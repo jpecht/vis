@@ -61,7 +61,7 @@ header {
   &:hover {
     background-position: 0% 50%;
     opacity: 1;
-  }  
+  }
 
   a,
   a:hover {

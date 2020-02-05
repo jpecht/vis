@@ -65,13 +65,13 @@ export default {
   padding: 80px 0 100px;
   position: relative;
   width: 100%;
-  z-index: 10;  
+  z-index: 10;
 }
 
 .content {
   margin-top: 50px;
   position: relative;
-  text-align: center; 
+  text-align: center;
   width: 100%;
 }
 
