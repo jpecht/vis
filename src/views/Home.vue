@@ -1,23 +1,29 @@
 <template>
   <div class="content">
     <Card
-      title="Income Thresholds"
-      subtitle="class division in the u.s."
-      date="Aug 19, 2014"
-      url="income"
-      imageFilename="income_ss.png"
+      v-for="v in visualizations"
+      :key="v.title"
+      :title="v.title"
+      :subtitle="v.subtitle"
+      :date="v.date"
+      :url="v.url"
+      :imageFilename="v.imageFilename"
     />
   </div>
 </template>
 
 <script>
 import Card from '@/components/Card.vue';
+import visualizations from '@/constants/VisualizationsList';
 
 export default {
   name: 'Home',
   components: {
     Card,
   },
+  data: () => ({
+    visualizations,
+  }),
 };
 </script>
 
