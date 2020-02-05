@@ -1,9 +1,9 @@
 <template>
   <div class="content">
     <Card
-      title="Title"
-      subtitle="Subtitle"
-      date="Date"
+      title="Income Thresholds"
+      subtitle="class division in the u.s."
+      date="Aug 19, 2014"
       url="income"
       imageFilename="income_ss.png"
     />

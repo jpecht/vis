@@ -6,26 +6,18 @@
         :style="{
           background: `url(${require(`@/assets/images/screenshots/${imageFilename}`)}) no-repeat`,
         }"
+        @mouseover="contentVisible = true"
+        @mouseout="contentVisible = false"
       >
-        <div class="content">
-          <h3
-            v-if="title"
-            class="title"
-          >
-            {{ title }}
-          </h3>
-          <h4
-            v-if="subtitle"
-            class="subtitle"
-          >
-            {{ subtitle }}
-          </h4>
-          <span
-            v-if="date"
-            class="date"
-          >
-            {{ date }}
-          </span>
+        <div
+          v-show="isMobile || contentVisible"
+          class="content"
+        >
+          <div>
+            <h3 class="title">{{ title }}</h3>
+            <h4 class="subtitle">{{ subtitle }}</h4>
+          </div>
+          <span class="date">{{ date }}</span>
         </div>
       </div>
     </router-link>
@@ -55,6 +47,15 @@ export default {
     url: {
       type: String,
       default: '/',
+    },
+  },
+  data: () => ({
+    contentVisible: false,
+  }),
+  computed: {
+    isMobile() {
+      return (typeof window.orientation !== "undefined")
+        || (navigator.userAgent.indexOf('IEMobile') !== -1);
     },
   },
 };
@@ -94,9 +95,10 @@ export default {
 }
 
 .content {
-  background-color: rgba(0, 0, 0, 0.65);
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.75);
   border-radius: 15px;
-  display: none;
+  display: flex;
   height: 100%;
   left: 0px;
   padding: 30px;
@@ -108,14 +110,17 @@ export default {
 .title {
   font-size: 24px;
   font-weight: 400;
+  margin: 0;
   position: relative;
 }
 
 .subtitle {
   font-size: 16px;
   font-weight: 300;
+  margin: 5px 0 0;
   position: relative;
 }
+
 .date {
   font-size: 14px;
   font-weight: 300;
