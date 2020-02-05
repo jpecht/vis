@@ -2,6 +2,7 @@
   <div class="container">
     <div class="content">
       <div class="post">
+        <span class="date">{{ date }}</span>
         <h3 class="title">{{ title }}</h3>
         <h4
           v-if="subtitle"
@@ -9,20 +10,15 @@
         >
           {{ subtitle }}
         </h4>
-        <span class="date">{{ date }}</span>
-        <div class="description-wrapper">
-          <div
-            v-if="description"
-            class="description"
-            v-html="description"
-          />
+        <div class="description">
+          <slot name="description" />
         </div>
-        <slot />
-        <div
-          v-if="postDescription"
-          class="description post-description"
-          v-html="postDescription"
-        />
+        <div class="vis">
+          <slot />
+        </div>
+        <div class="description post-description">
+          <slot name="post-description" />
+        </div>
       </div>
     </div>
   </div>
@@ -33,14 +29,6 @@ export default {
   name: 'Post',
   props: {
     date: {
-      type: String,
-      default: '',
-    },
-    description: {
-      type: String,
-      default: '',
-    },
-    postDescription: {
       type: String,
       default: '',
     },
@@ -126,5 +114,6 @@ export default {
   text-align: left;
 }
 
+.vis { font-size: 14px; }
 .post-description { padding: 0 0 5px; }
 </style>

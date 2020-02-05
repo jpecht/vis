@@ -1,8 +1,30 @@
 <template>
   <Post v-bind="info">
+    <template v-slot:description>
+      <p>
+        Below is every song in my music library mapped over the time I uploaded it to my library.
+        It's placed vertically based on its BPM (tempo).
+      </p>
+    </template>
     <div class="chart-container">
       <svg ref="chart"></svg>
     </div>
+    <template v-slot:post-description>
+      <p>
+        You can see vague horizontal lines around the more popular BPMs (128, 130, 140, 150, and 160).
+        The line is especially prominent in 2011-2014 around 140 BPM mark,
+        probably due to the big rise in dubstep around that time.
+        The blob in the beginning of 2011 around the 125-132 BPM range shows my discovery of progressive house.
+        And near the end of the timeline, you can see I get more interested in the 150 BPM trap-style songs.
+      </p>
+      <p>
+        I'm pretty sure I started collecting around 2005, but I think when I changed computers mid-2010,
+        a lot of songs picked up that 2010 upload date, hence the thick line there.
+        You can also see when I was computer-less for a couple months in 2015.
+        And lastly, you can see I started downloading much more frequently starting mid-2016
+        when I moved to Boulder and started DJing more.
+      </p>
+    </template>
   </Post>
 </template>
 
