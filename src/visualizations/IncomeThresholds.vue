@@ -1,24 +1,20 @@
 <template>
-  <Visualization
-    title="Income Thresholds"
-    subtitle="class division in the u.s."
-    date="Aug 19, 2014"
-    :description="description"
-  >
+  <Post v-bind="info">
     <div>Test</div>
-  </Visualization>
+  </Post>
 </template>
 
 <script>
-import Visualization from '@/components/Visualization.vue';
+import Post from '@/components/Post.vue';
+import visualizations from '@/constants/VisualizationsList';
 
 export default {
   name: 'IncomeThresholds',
   components: {
-    Visualization,
+    Post,
   },
   data: () => ({
-    description: 'The graph below shows the income level "cut-offs" in the United States. After adjusting for inflation, it\'s interesting to see the steady increase in the top 5%.',
+    info: visualizations.find(v => v.url === 'income'),
   }),
 };
 </script>

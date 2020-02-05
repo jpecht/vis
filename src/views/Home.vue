@@ -2,7 +2,7 @@
   <div class="content">
     <Card
       v-for="v in visualizations"
-      :key="v.title"
+      :key="v.url"
       :title="v.title"
       :subtitle="v.subtitle"
       :date="v.date"

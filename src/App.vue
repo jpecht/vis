@@ -1,17 +1,17 @@
 <template>
   <div id="app">
-    <Header :collapsed="$router.currentRoute.name !== 'home'" />
+    <SiteHeader :collapsed="$router.currentRoute.name !== 'home'" />
     <router-view/>
   </div>
 </template>
 
 <script>
-import Header from '@/components/Header.vue';
+import SiteHeader from '@/components/SiteHeader.vue';
 
 export default {
   name: 'App',
   components: {
-    Header,
+    SiteHeader,
   },
 };
 </script>

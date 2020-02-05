@@ -14,6 +14,11 @@ export default new Router({
       component: Home,
     },
     {
+      path: '/bpm-3',
+      name: 'bpm-3',
+      component: () => import('./visualizations/Bpm3.vue'),
+    },
+    {
       path: '/income',
       name: 'income',
       component: () => import('./visualizations/IncomeThresholds.vue'),
