@@ -1,7 +1,12 @@
 <template>
   <div class="container">
     <router-link :to="url">
-      <div class="card">
+      <div
+        class="card"
+        :style="{
+          background: `url(${require(`@/assets/images/screenshots/${imageFilename}`)}) no-repeat`,
+        }"
+      >
         <div class="content">
           <h3
             v-if="title"
@@ -34,6 +39,10 @@ export default {
     date: {
       type: String,
       default: '',
+    },
+    imageFilename: {
+      type: String,
+      required: true,
     },
     subtitle: {
       type: String,

@@ -5,6 +5,7 @@
       subtitle="Subtitle"
       date="Date"
       url="about"
+      imageFilename="income_ss.png"
     />
   </div>
 </template>
