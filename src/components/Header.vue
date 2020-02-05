@@ -1,16 +1,19 @@
 <template>
-  <header>
-    <div class="header-text-wrapper">
+  <header :class="{ collapsed }">
+    <div :class="{ 'header-text-wrapper': !collapsed }">
       <h1 class="header-text">
         <a href="./">
           visualizations
         </a>
       </h1>
-      <h2 class="subheader-text">
+      <h2
+        v-if="!collapsed"
+        class="subheader-text"
+      >
         by
         <a
           href="//www.jpecht.com"
-          class="jefferson-link"
+          class="author-link"
         >
           jefferson
         </a>
@@ -43,6 +46,24 @@ header {
   width: 100%;
   z-index: 5;
 
+  &.collapsed {
+    background-position: 50% 50%;
+    font-size: 2em;
+    font-weight: 800;
+    height: auto;
+    opacity: 0.95;
+    padding: 15px 0px;
+    position: relative;
+    top: 0px;
+    transition: opacity 1s, background-position 10s;
+    z-index: 20;
+
+    &:hover {
+      background-position: 0% 50%;
+      opacity: 1;
+    }  
+  }
+
   a,
   a:hover {
     color: white;
@@ -62,6 +83,10 @@ header {
   margin: 0;
 }
 
+header.collapsed .header-text {
+  font-size: 28px;
+}
+
 .subheader-text {
   font-size: 16px;
   font-weight: 400;
@@ -69,25 +94,5 @@ header {
   padding-top: 20px;
 }
 
-.jefferson-link:hover { text-decoration: underline; }
-
-
-/*** Collapsed styles - need to go over ***/
-.postpage-header {
-  position: fixed;
-  top: 0px;
-  padding: 15px 0px;
-  text-align: center;
-  font-weight: 800;
-  font-size: 2em;
-  color: white;
-  background-position: 50% 50%;
-  opacity: 0.95;
-  transition: opacity 1s, background-position 10s;
-  z-index: 20;
-}
-.postpage-header:hover {
-  background-position: 0% 50%;
-  opacity: 1;
-}
+.author-link:hover { text-decoration: underline; }
 </style>

@@ -4,7 +4,7 @@
       title="Title"
       subtitle="Subtitle"
       date="Date"
-      url="about"
+      url="income"
       imageFilename="income_ss.png"
     />
   </div>

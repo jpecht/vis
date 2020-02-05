@@ -15,7 +15,7 @@ export default {
   },
   computed: {
     isOnHomePage() {
-      return this.$router.currentRoute.hash === '';
+      return this.$router.currentRoute.name === 'home';
     },
   },
 };
@@ -24,9 +24,7 @@ export default {
 <style lang="scss">
 @import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,800&display=swap');
 
-body {
-  margin: 0;
-}
+body { margin: 0; }
 
 #app {
   color: #2c3e50;
@@ -34,4 +32,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+* { box-sizing: border-box; }
 </style>
