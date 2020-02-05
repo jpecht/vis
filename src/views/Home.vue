@@ -29,9 +29,7 @@ export default {
   left: 0px;
   min-height: 100vh;
   padding-bottom: 100px;
-  position: relative;
   text-align: center;
-  top: 50vh;
   width: 100%;
   z-index: 10;
 }

@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <Header :collapsed="!isOnHomePage" />
+    <Header :collapsed="$router.currentRoute.name !== 'home'" />
     <router-view/>
   </div>
 </template>
@@ -13,11 +13,6 @@ export default {
   components: {
     Header,
   },
-  computed: {
-    isOnHomePage() {
-      return this.$router.currentRoute.name === 'home';
-    },
-  },
 };
 </script>
 
@@ -27,7 +22,9 @@ export default {
 body { margin: 0; }
 
 #app {
-  color: #2c3e50;
+  color: #222;
+  display: flex;
+  flex-direction: column;
   font-family: 'Open Sans', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

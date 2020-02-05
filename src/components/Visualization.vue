@@ -60,10 +60,9 @@ export default {
 .container {
   background: url('~@/assets/images/blue_gradient.jpg') no-repeat center;
   background-size: cover;
-  color: black;
   left: 0px;
   min-height: 100vh;
-  padding: 10px 0 100px;
+  padding: 80px 0 100px;
   position: relative;
   width: 100%;
   z-index: 10;  

@@ -41,8 +41,8 @@ header {
   background-size: cover;
   color: white;
   height: 50vh;
-  position: absolute;
   text-align: center;
+  transition: opacity 1s, background-position 10s;
   width: 100%;
   z-index: 5;
 
@@ -53,16 +53,15 @@ header {
     height: auto;
     opacity: 0.95;
     padding: 15px 0px;
-    position: relative;
+    position: fixed;
     top: 0px;
-    transition: opacity 1s, background-position 10s;
     z-index: 20;
-
-    &:hover {
-      background-position: 0% 50%;
-      opacity: 1;
-    }  
   }
+
+  &:hover {
+    background-position: 0% 50%;
+    opacity: 1;
+  }  
 
   a,
   a:hover {
