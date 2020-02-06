@@ -28,6 +28,13 @@ export default [
     imageFilename: 'dc_demographics_ss.png',
   },
   {
+    title: 'How Teams Do In March Madness',
+    subtitle: 'tournament performance in the last 30 years',
+    date: 'Mar 19, 2015',
+    url: 'march-madness',
+    imageFilename: 'march_madness_ss.png',
+  },
+  {
     title: 'Income Thresholds',
     subtitle: 'class division in the u.s.',
     date: 'Aug 19, 2014',

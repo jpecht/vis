@@ -38,5 +38,10 @@ export default new Router({
       name: 'income',
       component: () => import('./visualizations/IncomeThresholds.vue'),
     },
+    {
+      path: '/march-madness',
+      name: 'march-madness',
+      component: () => import('./visualizations/MarchMadness.vue'),
+    },
   ],
 });
