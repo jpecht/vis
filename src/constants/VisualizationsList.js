@@ -21,6 +21,13 @@ export default [
     imageFilename: 'bpm_visual_2_ss.png',
   },
   {
+    title: 'DC Demographics',
+    subtitle: 'breakdown of dc by demographic',
+    date: 'Jun 18, 2015',
+    url: 'dc-demographics',
+    imageFilename: 'dc_demographics_ss.png',
+  },
+  {
     title: 'Income Thresholds',
     subtitle: 'class division in the u.s.',
     date: 'Aug 19, 2014',

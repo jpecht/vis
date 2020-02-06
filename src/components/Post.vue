@@ -114,6 +114,10 @@ export default {
   text-align: left;
 }
 
-.vis { font-size: 13px; }
-.post-description { padding: 0 0 5px; }
+.vis {
+  font-size: 13px;
+  text-align: center;
+}
+
+.post-description { padding-bottom: 5px; }
 </style>

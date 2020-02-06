@@ -46,9 +46,9 @@ export default {
   },
   methods: {
     async createVis() {
-      const margin = { top: 5, right: 10, bottom: 60, left: 45 };
+      const margin = { top: 5, right: 10, bottom: 40, left: 45 };
       const width = 550 - margin.left - margin.right;
-      const height = 280 - margin.top - margin.bottom;
+      const height = 260 - margin.top - margin.bottom;
 
       const chart = d3.select(this.$refs.chart)
         .attr('width', width + margin.left + margin.right)

@@ -16,7 +16,7 @@
       <div class="source-wrapper">
         <div class="source">* curve being drawn is a b-spline</div>
       </div>
-      <div>
+      <div class="button-container">
         <div class="year-btn-group btn-group">
           <div class="2014-button btn btn-default">Nov 2014</div>
           <div class="2016-button btn btn-default">Sep 2016</div>
@@ -204,6 +204,10 @@ export default {
 @import '~@/styles/legacy/bootstrap-partial.css';
 
 .bpm-2-chart-container {
+  .button-container {
+    text-align: center;
+  }
+  
   .label {
     text-anchor: middle;
     text-align: center;
