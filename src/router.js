@@ -34,6 +34,11 @@ export default new Router({
       component: () => import('./visualizations/DcDemographics.vue'),
     },
     {
+      path: '/facebook-network',
+      name: 'facebook-network',
+      component: () => import('./visualizations/FacebookNetwork.vue'),
+    },
+    {
       path: '/fantasy-football-performance',
       name: 'fantasy-football-performance',
       component: () => import('./visualizations/FantasyFootballPerformance.vue'),

@@ -42,6 +42,13 @@ export default [
     imageFilename: 'ff_performance_ss.png',
   },
   {
+    title: 'Facebook Friend Network',
+    subtitle: 'force layout diagram of my facebook friends',
+    date: 'Nov 21, 2014',
+    url: 'facebook-network',
+    imageFilename: 'fb_force_ss.png',
+  },
+  {
     title: 'Income Thresholds',
     subtitle: 'class division in the u.s.',
     date: 'Aug 19, 2014',
