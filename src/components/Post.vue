@@ -71,7 +71,7 @@ export default {
   padding: 30px 40px;
   position: relative;
   text-align: left;
-  width: 700px;
+  width: 760px;
 }
 
 .title {

@@ -35,6 +35,13 @@ export default [
     imageFilename: 'march_madness_ss.png',
   },
   {
+    title: 'Fantasy Football Revisited',
+    subtitle: 'how well fantasy football players performed',
+    date: 'Dec 25, 2014',
+    url: 'fantasy-football-performance',
+    imageFilename: 'ff_performance_ss.png',
+  },
+  {
     title: 'Income Thresholds',
     subtitle: 'class division in the u.s.',
     date: 'Aug 19, 2014',

@@ -34,6 +34,11 @@ export default new Router({
       component: () => import('./visualizations/DcDemographics.vue'),
     },
     {
+      path: '/fantasy-football-performance',
+      name: 'fantasy-football-performance',
+      component: () => import('./visualizations/FantasyFootballPerformance.vue'),
+    },
+    {
       path: '/income',
       name: 'income',
       component: () => import('./visualizations/IncomeThresholds.vue'),
