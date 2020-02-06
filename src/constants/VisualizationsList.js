@@ -14,6 +14,13 @@ export default [
     imageFilename: 'bball_ranks_2016_ss.png',
   },
   {
+    title: 'BPM Visual Revisited',
+    subtitle: 'my music collection sorted by bpm',
+    date: 'Sep 14, 2016',
+    url: 'bpm-2',
+    imageFilename: 'bpm_visual_2_ss.png',
+  },
+  {
     title: 'Income Thresholds',
     subtitle: 'class division in the u.s.',
     date: 'Aug 19, 2014',

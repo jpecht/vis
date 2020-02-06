@@ -115,7 +115,7 @@ export default {
 }
 
 .subtitle {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 300;
   margin: 5px 0 0;
   position: relative;

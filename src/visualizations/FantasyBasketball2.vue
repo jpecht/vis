@@ -108,29 +108,13 @@ export default {
 </script>
 
 <style lang="scss">
-.bball-ranks-2-table {
+@import '~@/styles/legacy/bootstrap-partial.css';
 
+.bball-ranks-2-table {
   table {
     border-collapse: collapse;
     border-spacing: 0;
-    width: 100%;
   }
-
-  table,
-  th,
-  td {
-    border: 1px solid #ddd;
-  }
-
-  /* tr:first-child td { background-color: rgba(0, 0, 0, 0.1); }
-
-  tr:nth-of-type(10n+1),
-  tr:nth-of-type(10n),
-  tr:nth-of-type(10n-1),
-  tr:nth-of-type(10n-2),
-  tr:nth-of-type(10n-3) {
-    td:nth-child(-n+3) { background-color: rgba(0, 0, 0, 0.1); }    
-  } */
 
   td { text-align: center; }
 
