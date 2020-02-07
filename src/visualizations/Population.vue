@@ -22,13 +22,10 @@
         <div id="pop-slider-text">Year: 2010</div>
       </div>
       <div id="pop-dropdown-container" class="dropdown dropup">
-        <button class="btn btn-default dropdown-toggle" type="button" id="pop-dropdown" data-toggle="dropdown">
-          <span id="pop-dropdown-title">Pop Levels</span>&nbsp;&nbsp;<span class="caret"></span>
-        </button>
-        <ul id="pop-dropdown-menu" class="dropdown-menu" role="menu" aria-labelledby="pop-dropdown">
-          <li role="presentation"><a role="menuitem" href="#" stat="level">Pop Levels</a></li>
-          <li role="presentation"><a role="menuitem" href="#" stat="growth">Pop Growth</a></li>
-        </ul>
+        <select class="pop-dropdown">
+          <option value="level">Pop Levels</option>
+          <option value="growth">Pop Growth</option>
+        </select>
       </div>
       <div id="pop-source" class="source map-source">Source: U.S. Census Bureau</div>             
     </div>
@@ -158,13 +155,11 @@ export default {
         };
       
         // dropdown behavior
-        $('#pop-dropdown-container a').click(function(e) {
-          e.preventDefault();
-          $('#pop-dropdown-title').text($(this).text());
-          current_stat = ($(this).attr('stat') === 'level') ? '' : 'c';
+        $('.pop-dropdown').click(function(e) {
+          current_stat = ($(this).val() === 'level') ? '' : 'c';
           current_year = current_year - (current_year % 10); // round year for simplification
-          $('#pop-slider').val(current_year);
-          $('#pop-slider-text').text('Year: ' + current_year);
+          // $('#pop-slider').val(current_year);
+          // $('#pop-slider-text').text('Year: ' + current_year);
           threshold = (current_stat === '') ? l_threshold : g_threshold; 
           updatePopMap();
         }); 
@@ -196,6 +191,7 @@ export default {
   text-align: left;
   border: 1px solid #CCC;
   box-shadow: inset 1px 1px 1px rgba(0,0,0,0.4);
+  position: relative;
 
   .map-source {
     margin: 0px 20px 15px 0px;
@@ -237,7 +233,7 @@ export default {
     font-size: 1em;
     font-weight: 400;
   }
-  #pop-dropdown-container {
+  .pop-dropdown {
     position: absolute;
     bottom: 20px;
     left: 20px;
