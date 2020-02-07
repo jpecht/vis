@@ -56,6 +56,13 @@ export default [
     imageFilename: 'bpm_visual_ss.png',
   },
   {
+    title: 'DC Snowfall',
+    subtitle: 'yearly snowfall in dc',
+    date: 'Nov 10, 2014',
+    url: 'dc-snowfall',
+    imageFilename: 'dc_snowfall_ss.png',
+  },
+  {
     title: 'Income Thresholds',
     subtitle: 'class division in the u.s.',
     date: 'Aug 19, 2014',

@@ -68,10 +68,11 @@ export default {
   border-radius: 10px;
   box-shadow: 1px 1px 6px rgba(0, 0, 0, 0.6);
   display: inline-block;
+  max-width: 700px;
   padding: 30px 40px;
   position: relative;
   text-align: left;
-  width: 760px;
+  width: 100%;
 }
 
 .title {
