@@ -29,6 +29,11 @@ export default new Router({
       component: () => import('./visualizations/Bpm3.vue'),
     },
     {
+      path: '/bball-ranks',
+      name: 'bball-ranks',
+      component: () => import('./visualizations/FantasyBasketball.vue'),
+    },
+    {
       path: '/bball-ranks-2',
       name: 'bball-ranks-2',
       component: () => import('./visualizations/FantasyBasketball2.vue'),

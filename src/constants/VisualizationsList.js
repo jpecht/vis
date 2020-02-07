@@ -63,6 +63,13 @@ export default [
     imageFilename: 'dc_snowfall_ss.png',
   },
   {
+    title: 'Fantasy Basketball Ranks',
+    subtitle: 'the top basketball players in fantasy scoring',
+    date: 'Oct 28, 2014',
+    url: 'bball-ranks',
+    imageFilename: 'bball_ranks_ss.png',
+  },
+  {
     title: 'Income Thresholds',
     subtitle: 'class division in the u.s.',
     date: 'Aug 19, 2014',
