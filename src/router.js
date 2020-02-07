@@ -68,5 +68,10 @@ export default new Router({
       name: 'march-madness',
       component: () => import('./visualizations/MarchMadness.vue'),
     },
+    {
+      path: '/tv-show-viewership',
+      name: 'tv-show-viewership',
+      component: () => import('./visualizations/TvShowViewership.vue'),
+    },
   ],
 });

@@ -70,6 +70,13 @@ export default [
     imageFilename: 'bball_ranks_ss.png',
   },
   {
+    title: 'TV Show Viewership',
+    subtitle: 'a look at the ratings of recent popular tv shows',
+    date: 'Oct 12, 2014',
+    url: 'tv-show-viewership',
+    imageFilename: 'tv_shows_ss.png',
+  },
+  {
     title: 'Income Thresholds',
     subtitle: 'class division in the u.s.',
     date: 'Aug 19, 2014',
