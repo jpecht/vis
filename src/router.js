@@ -59,6 +59,11 @@ export default new Router({
       component: () => import('./visualizations/FacebookNetwork.vue'),
     },
     {
+      path: '/fantasy-draft-2',
+      name: 'fantasy-draft-2',
+      component: () => import('./visualizations/FantasyDraft2.vue'),
+    },
+    {
       path: '/fantasy-football-performance',
       name: 'fantasy-football-performance',
       component: () => import('./visualizations/FantasyFootballPerformance.vue'),

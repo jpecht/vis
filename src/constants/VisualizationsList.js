@@ -84,6 +84,13 @@ export default [
     imageFilename: 'education_ss.png',
   },
   {
+    title: 'Fantasy Draft Picks Pt. 2',
+    subtitle: 'a look at my league\'s draft picks',
+    date: 'Sep 4, 2014',
+    url: 'fantasy-draft-2',
+    imageFilename: 'ff_2_ss.png',
+  },
+  {
     title: 'Income Thresholds',
     subtitle: 'class division in the u.s.',
     date: 'Aug 19, 2014',
