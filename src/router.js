@@ -49,6 +49,11 @@ export default new Router({
       component: () => import('./visualizations/DcSnowfall.vue'),
     },
     {
+      path: '/drought',
+      name: 'drought',
+      component: () => import('./visualizations/Drought.vue'),
+    },
+    {
       path: '/education-spending',
       name: 'education-spending',
       component: () => import('./visualizations/EducationSpending.vue'),
@@ -57,6 +62,11 @@ export default new Router({
       path: '/facebook-network',
       name: 'facebook-network',
       component: () => import('./visualizations/FacebookNetwork.vue'),
+    },
+    {
+      path: '/fantasy-draft',
+      name: 'fantasy-draft',
+      component: () => import('./visualizations/FantasyDraft.vue'),
     },
     {
       path: '/fantasy-draft-2',
@@ -77,6 +87,16 @@ export default new Router({
       path: '/march-madness',
       name: 'march-madness',
       component: () => import('./visualizations/MarchMadness.vue'),
+    },
+    {
+      path: '/population',
+      name: 'population',
+      component: () => import('./visualizations/Population.vue'),
+    },
+    {
+      path: '/poverty',
+      name: 'poverty',
+      component: () => import('./visualizations/Poverty.vue'),
     },
     {
       path: '/tv-show-viewership',

@@ -9,6 +9,11 @@
         The data was taken "per student" to avoid population size playing an influence.
         All data is comparative to the national average.
       </p>
+      <p>
+        <span style="font-weight:600;">Note:</span>
+        The dropdown no longer displays correctly after porting this vis to Vue.
+        You can still click the buttons to view different indicators though.
+      </p>
     </template>
     <div class="education-map-wrapper map-wrapper">
       <div id="education-map" class="us-map"></div>
