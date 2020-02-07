@@ -49,6 +49,11 @@ export default new Router({
       component: () => import('./visualizations/DcSnowfall.vue'),
     },
     {
+      path: '/education-spending',
+      name: 'education-spending',
+      component: () => import('./visualizations/EducationSpending.vue'),
+    },
+    {
       path: '/facebook-network',
       name: 'facebook-network',
       component: () => import('./visualizations/FacebookNetwork.vue'),

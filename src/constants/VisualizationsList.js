@@ -77,6 +77,13 @@ export default [
     imageFilename: 'tv_shows_ss.png',
   },
   {
+    title: 'Education Spending',
+    subtitle: 'how much money is spent per student in the u.s.',
+    date: 'Sep 16, 2014',
+    url: 'education-spending',
+    imageFilename: 'education_ss.png',
+  },
+  {
     title: 'Income Thresholds',
     subtitle: 'class division in the u.s.',
     date: 'Aug 19, 2014',
