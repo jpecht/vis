@@ -49,6 +49,13 @@ export default [
     imageFilename: 'fb_force_ss.png',
   },
   {
+    title: 'BPM Visual',
+    subtitle: 'my music collection sorted by bpm',
+    date: 'Nov 11, 2014',
+    url: 'bpm',
+    imageFilename: 'bpm_visual_ss.png',
+  },
+  {
     title: 'Income Thresholds',
     subtitle: 'class division in the u.s.',
     date: 'Aug 19, 2014',

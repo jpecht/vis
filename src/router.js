@@ -14,6 +14,11 @@ export default new Router({
       component: Home,
     },
     {
+      path: '/bpm',
+      name: 'bpm',
+      component: () => import('./visualizations/Bpm.vue'),
+    },
+    {
       path: '/bpm-2',
       name: 'bpm-2',
       component: () => import('./visualizations/Bpm2.vue'),
