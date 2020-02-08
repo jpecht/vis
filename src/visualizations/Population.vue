@@ -25,18 +25,18 @@
             :min="1790"
             :max="2010"
             :interval="10"
+            tooltip="none"
             v-model="year"
             @change="handleSliderChange"
           />
         </div>
-        <div id="pop-slider-text">Year: 2010</div>
+        <div id="pop-slider-text">Year: <b>{{ year }}</b></div>
       </div>
       <div id="pop-dropdown-container">
         <b-dropdown
           class="pop-dropdown"
           :text="metricFormatted"
           variant="light"
-          tooltip="none"
         >
           <b-dropdown-item @click="handleDropdownChange('')">
             Pop Levels
@@ -159,7 +159,6 @@ export default {
         var high_year = low_year + 10;        
       }
       
-      $('#pop-slider-text').text('Year: ' + current_year);
       d3.select(this.$refs.map).selectAll('.county').style('fill', (d, i) => {
         if (this.stats.hasOwnProperty(+d.id)) {
           if (year_to_decade === 0) {
@@ -260,5 +259,6 @@ export default {
     left: 20px;
     border: 1px solid #bbb;
   }
+  b { font-weight: 600; }
 }
 </style>
