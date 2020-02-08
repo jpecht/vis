@@ -36,6 +36,7 @@
           class="pop-dropdown"
           :text="metricFormatted"
           variant="light"
+          tooltip="none"
         >
           <b-dropdown-item @click="handleDropdownChange('')">
             Pop Levels
@@ -206,8 +207,8 @@ export default {
   box-shadow: inset 1px 1px 1px rgba(0,0,0,0.4);
   position: relative;
 
-  .dropdown-toggle { font-size: 12px; }
-  .dropdown-item { font-size: 12px; }
+  .dropdown-toggle { font-size: 13px; }
+  .dropdown-item { font-size: 13px; }
 
   .map-source {
     margin: 0px 20px 15px 0px;
