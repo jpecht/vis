@@ -29,10 +29,10 @@
         :height="chart.height"
         :width="chart.width"
       />
-      <div class="row">
-        <div class="chart-info col-xs-6"></div>
-        <div class="col-xs-6 legend">
-          <svg></svg>
+      <div class="context-container">
+        <div class="chart-info">{{ infoText }}</div>
+        <div>
+          <svg class="legend" ref="legend" />
           <div class="legend-text"># of Mutual Friends</div>
         </div>
       </div>
@@ -94,11 +94,16 @@ export default {
     },
     infoText: '',
     postInfo: visualizations.find(v => v.url === 'facebook-network'),
-    selectedName: '',
+    selected: '',
     selectedNumMutual: 0,
+    simulation: null,
   }),
   mounted() {
     this.createVis();
+    this.drawLegend();
+  },
+  destroyed() {
+    if (this.simulation) this.simulation.stop();
   },
   methods: {
     async retrieveData() {
@@ -137,25 +142,26 @@ export default {
     },
 
     async createVis() {
+      const self = this;
       const { chart } = this.$refs;
 
       const { linksData, nodesData } = await this.retrieveData();
 
-      const simulation = d3.forceSimulation(nodesData)
-        .force('charge', d3.forceManyBody().theta(0.8).strength(-100))
+      this.simulation = d3.forceSimulation(nodesData)
+        .force('charge', d3.forceManyBody().theta(0.8).strength(-30))
         // .force('collision', d3.forceCollide().strength(0.8))
-        .force('x', d3.forceX(this.chart.width / 2).strength(0.5))
-        .force('y', d3.forceY(this.chart.height / 2).strength(0.5))
+        .force('x', d3.forceX(this.chart.width / 2).strength(0.1))
+        .force('y', d3.forceY(this.chart.height / 2).strength(0.1))
         .force('link', d3.forceLink(linksData));
 
       // draw nodes and links
-      const link = d3.select(chart).selectAll('.link')
+      const link = d3.select(chart).append('g').selectAll('.link')
         .data(linksData)
         .join('line')
           .attr('class', 'link')
           .style('stroke', linkColor);
 
-      const node = d3.select(chart).selectAll('.node')
+      const node = d3.select(chart).append('g').selectAll('.node')
         .data(nodesData)
         .enter().append('circle')
           .attr('class', 'node')
@@ -172,7 +178,8 @@ export default {
           .on('mouseout', () => {
             this.setInfoText();
           })
-          .on('click', (d) => {
+          .on('click', function selectNode(d) {
+            self.selected = (self.selected.uid2 === d.uid2) ? '' : d;
             d3.event.stopPropagation();
             d3.selectAll('.node').style('stroke', nodeStrokeColor);
             d3.select(this).style('stroke', highNodeStrokeColor);
@@ -182,21 +189,23 @@ export default {
               .filter(linkDatum => (
                 linkDatum.source.index === d.index || linkDatum.target.index === d.index
               ))
-                .style('stroke', highLinkColor);
+                .style('stroke', highLinkColor)
+                .each(function reorder() {
+                  this.parentNode.appendChild(this);
+                });
               
-            this.setInfoText(d);
+            self.setInfoText(d);
           })
-          .call(this.dragSimulator(simulation));
+          .call(this.dragSimulator());
 
 
       // begin simulation
-      simulation.on('tick', () => {
+      this.simulation.on('tick', () => {
         node.attr('transform', (d) => {
           d.x = Math.max(nodeRadius, Math.min(this.chart.width - nodeRadius, d.x));
           d.y = Math.max(nodeRadius, Math.min(this.chart.height - nodeRadius, d.y));
           return `translate(${d.x}, ${d.y})`;
         });
-        // node.attr('transform', d => `translate(${d.x}, ${d.y})`);
         link
           .attr('x1', d => d.source.x)
           .attr('y1', d => d.source.y)
@@ -205,35 +214,36 @@ export default {
       });
 
       // Clear selected when clicking on the chart itself
-      // d3.select(chart).on('click', this.clearSelected);
+      d3.select(chart).on('click', this.clearSelected);
     },
 
     drawLegend() {
       // draw legend
-      var rect_width = 30, rect_height = 10;
-      var legend_data = mutualScale.range();
-      legend_data.push('');
-      var legend = d3.select('.legend svg')
-        .attr('height', rect_height + 25)
-        .attr('width', rect_width * 6 + 20);
-      var legend_colors = legend.selectAll('g')
-        .data(legend_data)
-        .enter().append('g')
-          .attr('transform', function(d, i) {
-            return 'translate(' + (i*rect_width+10) + ', 0)';
-          });
-      legend_colors.append('rect')
-        .attr('width', rect_width)
-        .attr('height', rect_height)
-        .style('display', function(d, i) { return (i === legend_data.length - 1) ? 'none' : ''; })
+      const rectWidth = 30;
+      const rectHeight = 10;
+
+      const legendData = mutualScale.range();
+      legendData.push('');
+
+      const legend = d3.select(this.$refs.legend)
+        .attr('height', rectHeight + 25)
+        .attr('width', rectWidth * 6 + 40);
+      const legendColors = legend.selectAll('g')
+        .data(legendData)
+        .join('g')
+          .attr('transform', (d, i) => `translate(${(i * rectWidth + 20)}, 0)`);
+      legendColors.append('rect')
+        .attr('width', rectWidth)
+        .attr('height', rectHeight)
+        .style('display', (d, i) => (i === legendData.length - 1 ? 'none' : ''))
         .attr('fill', function(d) { return d; });
-      legend_colors.append('text')
+      legendColors.append('text')
         .attr('class', 'legend-text')
-        .attr('y', rect_height + 12)
-        .html(function(d, i) {
+        .attr('y', rectHeight + 12)
+        .html((d, i) => {
           if (i === 0) return '1';
-          else if (i === legend_data.length - 1) return '150';
-          else return mutualScale.domain()[i-1];
+          if (i === legendData.length - 1) return '150';
+          return mutualScale.domain()[i - 1];
         });
     },
 
@@ -243,10 +253,10 @@ export default {
       this.setInfoText();
     },
 
-    dragSimulator(simulation) {
+    dragSimulator() {
       return d3.drag()
         .on('start', (d) => {
-          if (!d3.event.active) simulation.alphaTarget(.03).restart();
+          if (!d3.event.active) this.simulation.alphaTarget(.03).restart();
           d.fx = d.x;
           d.fy = d.y;
         })
@@ -255,15 +265,16 @@ export default {
           d.fy = d3.event.y;
         })
         .on('end', (d) => {
-          if (!d3.event.active) simulation.alphaTarget(.03);
+          if (!d3.event.active) this.simulation.alphaTarget(.03);
           d.fx = null;
           d.fy = null;
         });
     },
 
     setInfoText(d) {
-      this.infoText = d
-        ? `${d.uid2}: ${d.numMutual} mutual friends`
+      const target = d || this.selected;
+      this.infoText = target
+        ? `${target.uid2}: ${target.numMutual} mutual friends`
         : '';
     },
   },
@@ -279,15 +290,22 @@ export default {
   stroke-width: 1;
   stroke-opacity: .6;
 }
-.chart-info {
+
+.context-container {
   font-weight: 400;
-  margin-top: 10px;
+  margin-top: 15px;
   text-align: center;
+}
+.chart-info {
+  display: inline-block;
+  font-weight: 600;
 }
 .legend {
   margin-top: 10px;
   text-align: center;
 }
-.legend text { text-anchor: middle; }
-.legend-text { margin-top: -5px; }
+.legend text {
+  font-size: 11px;
+  text-anchor: middle;
+}
 </style>
