@@ -1,5 +1,8 @@
 # vis
 
+## Description
+A collection of data visualization snippets that use [d3](https://github.com/d3/d3)
+
 ## Project setup
 ```
 yarn install
