@@ -31,5 +31,4 @@ body { margin: 0; }
 }
 
 * { box-sizing: border-box; }
-b { font-weight: 600; }
 </style>

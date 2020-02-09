@@ -5,9 +5,13 @@ import App from './App.vue';
 import router from './router';
 import store from './store';
 
+// Import vendor CSS
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 import 'vue-slider-component/theme/default.css';
+
+// Import global CSS
+import '@/styles/vendor.scss';
 
 Vue.config.productionTip = false;
 

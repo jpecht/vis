@@ -14,7 +14,7 @@
       </p> 
       <p>
         But looking at all the races combined, you can see there is a clear increase in poverty rates in the South,
-        particularly in the southwest region as well (maybe due to high immigration down there?) and the East Kentucky region. Otherwise, for the minority races, the distribution looks pretty scattered. 
+        particularly in the southwest region as well and the East Kentucky region. Otherwise, for the minority races, the distribution looks pretty scattered. 
         It'd be interesting to see if there's a significant difference between urban and rural areas.
       </p>
       <p>
@@ -26,22 +26,20 @@
     <div id="poverty-map-wrapper" class="map-wrapper">
       <div id="poverty-map" class="us-map"></div>
       <div id="poverty-map-footer">
-        <div id="poverty-dropdown-container" class="dropdown dropup">
-          <button class="btn btn-default dropdown-toggle" type="button" id="poverty-dropdown" data-toggle="dropdown">
-            <span id="poverty-dropdown-title">All Races</span>&nbsp;&nbsp;<span class="caret"></span>
-          </button>
-          <ul class="dropdown-menu" role="menu" aria-labelledby="poverty-dropdown">
-            <li role="presentation"><a role="menuitem" href="#" stat="total">All Races</a></li>
-            <li role="presentation"><a role="menuitem" href="#" stat="white">White</a></li>
-            <li role="presentation"><a role="menuitem" href="#" stat="black">Black or African American</a></li>
-            <li role="presentation"><a role="menuitem" href="#" stat="aian">American Indian and Alaska Native</a></li>
-            <li role="presentation"><a role="menuitem" href="#" stat="asian">Asian</a></li>
-            <li role="presentation"><a role="menuitem" href="#" stat="hawaiian_pi">Native Hawaiian and Pacific Islander</a></li>
-            <li role="presentation"><a role="menuitem" href="#" stat="hispanic">Hispanic or Latino Origin</a></li>
-            <li role="presentation"><a role="menuitem" href="#" stat="other">Other</a></li>
-            <li role="presentation"><a role="menuitem" href="#" stat="one_race">One Race</a></li>
-            <li role="presentation"><a role="menuitem" href="#" stat="two_races">Two or More Races</a></li>
-          </ul>
+        <div id="poverty-dropdown-container" class="dropdown">
+          <b-dropdown
+            class="poverty-dropdown"
+            :text="statLabel"
+            variant="light"
+          >
+            <b-dropdown-item
+              v-for="option in dropdownOptions"
+              :key="option.value"
+              @click="handleDropdownChange(option)"
+            >
+              {{ option.label }}
+            </b-dropdown-item>
+          </b-dropdown>
         </div>      
         <div id="poverty-legend" class="legend">
           <svg>
@@ -61,7 +59,9 @@
           </div>
         </div>
       </div>
-      <div id="poverty-average-text"></div>
+      <div id="poverty-average-text">
+        {{ averageText }}
+      </div>
       <div id="poverty-source" class="source map-source">Source: U.S. Census Bureau</div>
     </div>
   </Post>
@@ -74,13 +74,56 @@ import * as topojson from 'topojson';
 import $ from 'jquery';
 import visualizations from '@/constants/VisualizationsList';
 
+// colors! some from colorbrewer.org
+var blue_colors = ['rgb(189,215,231)','rgb(107,174,214)','rgb(49,130,189)','rgb(7,81,156)','rgb(28,53,99)'];
+var choropleth = ['rgb(247,251,255)','rgb(222,235,247)','rgb(198,219,239)','rgb(158,202,225)','rgb(107,174,214)','rgb(66,146,198)','rgb(33,113,181)','rgb(8,81,156)','rgb(8,48,107)'];
+var PuBu = ['rgb(255,247,251)','rgb(236,231,242)','rgb(208,209,230)','rgb(166,189,219)','rgb(116,169,207)','rgb(54,144,192)','rgb(5,112,176)','rgb(4,90,141)','rgb(2,56,88)'];
+var PuBuGn = ['rgb(255,247,251)','rgb(236,226,240)','rgb(208,209,230)','rgb(166,189,219)','rgb(103,169,207)','rgb(54,144,192)','rgb(2,129,138)','rgb(1,108,89)','rgb(1,70,54)'];
+var YlOrBr = ["#ffffd4","#fed98e","#fe9929","#d95f0e","#993404"];
+var OrRd = ["#fef0d9","#fdcc8a","#fc8d59","#e34a33","#b30000"];
+var na_color = 'rgb(200,200,200)';
+
+// custom thresholds for each race
+var t_domains = {
+  'total': [10, 15, 20, 30],
+  'white': [10, 15, 20, 30],
+  'black': [10, 15, 25, 35],
+  'aian': [10, 15, 20, 30],
+  'asian': [10, 15, 20, 30],
+  'hawaiian_pi': [10, 15, 20, 30],
+  'hispanic': [10, 15, 25, 35],
+  'other': [10, 15, 20, 30],
+  'one_race': [10, 15, 20, 30],
+  'two_races': [10, 15, 20, 30]
+};
+
+const dropdownOptions = [
+  { label: 'All Races', value: 'total' },
+  { label: 'White', value: 'white' },
+  { label: 'Black or African American', value: 'black' },
+  { label: 'American Indian and Alaska Native', value: 'aian' },
+  { label: 'Asian', value: 'asian' },
+  { label: 'Native Hawaiian and Pacific Islander', value: 'hawaiian_pi' },
+  { label: 'Hispanic or Latino Origin', value: 'hispanic' },
+  { label: 'Other', value: 'other' },
+  { label: 'One Race', value: 'one_race' },
+  { label: 'Two or More Races', value: 'two_races' },
+];
+
 export default {
   name: 'Poverty',
   components: {
     Post,
   },
   data: () => ({
+    averageText: '',
+    countyStats: {},
+    dropdownOptions,
     info: visualizations.find(v => v.url === 'poverty'),
+    nationalAverage: 0,
+    stat: 'total',
+    statLabel: 'All Races',
+    stateStats: {},
   }),
   mounted() {
     this.createVis();
@@ -88,24 +131,14 @@ export default {
   methods: {
     async createVis() {
       // initialization for maps
-      var map_width = ($(window).width() < 600) ? $(window).width() - 60 : 600, 
+      const map_width = ($(window).width() < 600) ? $(window).width() - 60 : 600, 
         map_height = ($(window).width() < 600) ? 300 : 450,
         map_scale = ($(window).width() < 600) ? $(window).width() : 800; // a crude calculation of scale
         
-      var projection = d3.geoAlbersUsa()
+      const projection = d3.geoAlbersUsa()
         .scale(map_scale)
         .translate([map_width / 2, map_height / 2]);
-      var path = d3.geoPath().projection(projection);
-      
-      // colors! some from colorbrewer.org
-      var blue_colors = ['rgb(189,215,231)','rgb(107,174,214)','rgb(49,130,189)','rgb(7,81,156)','rgb(28,53,99)'];
-      var choropleth = ['rgb(247,251,255)','rgb(222,235,247)','rgb(198,219,239)','rgb(158,202,225)','rgb(107,174,214)','rgb(66,146,198)','rgb(33,113,181)','rgb(8,81,156)','rgb(8,48,107)'];
-      var PuBu = ['rgb(255,247,251)','rgb(236,231,242)','rgb(208,209,230)','rgb(166,189,219)','rgb(116,169,207)','rgb(54,144,192)','rgb(5,112,176)','rgb(4,90,141)','rgb(2,56,88)'];
-      var PuBuGn = ['rgb(255,247,251)','rgb(236,226,240)','rgb(208,209,230)','rgb(166,189,219)','rgb(103,169,207)','rgb(54,144,192)','rgb(2,129,138)','rgb(1,108,89)','rgb(1,70,54)'];
-      var YlOrBr = ["#ffffd4","#fed98e","#fe9929","#d95f0e","#993404"];
-      var OrRd = ["#fef0d9","#fdcc8a","#fc8d59","#e34a33","#b30000"];
-      var na_color = 'rgb(200,200,200)';
-      
+      const path = d3.geoPath().projection(projection);      
       
       /* --------------------------------- poverty post --------------------------- */
       // American Fact Finder: S1701
@@ -113,113 +146,93 @@ export default {
         .attr('width', map_width)
         .attr('height', map_height);
         
-      
-      var pov_data_ready = function(error, us, pov_data, pa_data) {
-        // drawing the map
-          var counties = topojson.feature(us, us.objects.counties).features;
-          var states = topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; });    
-        poverty_svg.append('g')
-          .attr('class', 'counties')
-          .selectAll('path')
-            .data(counties)
-          .enter().append('path')
-            .attr('class', 'county')
-            .attr('d', path);   
-        poverty_svg.append("path").datum(states)
-          .attr("class", "states")
-          .attr("d", path);
-          
-        // organizing data
-        var county_stats = {};
-        for (var i = 0; i < pov_data.length; i++) {
-          var year = +pov_data[i].year;
-          var fips = +pov_data[i].fips;
-          if (!county_stats.hasOwnProperty(year)) county_stats[year] = {};
-          county_stats[year][fips] = pov_data[i];
-        } 
-        
-        var state_stats = {};
-        for (var i = 0; i < pa_data.length; i++) {
-          var year = +pa_data[i].year;
-          var fips = +pa_data[i].fips;
-          if (!state_stats.hasOwnProperty(year)) state_stats[year] = {};
-          state_stats[year][fips] = pa_data[i];
-        }
-      
-        // custom thresholds for each race
-        var t_domains = {
-          'total': [10, 15, 20, 30],
-          'white': [10, 15, 20, 30],
-          'black': [10, 15, 25, 35],
-          'aian': [10, 15, 20, 30],
-          'asian': [10, 15, 20, 30],
-          'hawaiian_pi': [10, 15, 20, 30],
-          'hispanic': [10, 15, 25, 35],
-          'other': [10, 15, 20, 30],
-          'one_race': [10, 15, 20, 30],
-          'two_races': [10, 15, 20, 30]
-        };
-          
-        var curr_stat = 'total',
-          avg_text = '';
-        
-        var updateMap = function(stat) {  
-          curr_stat = stat;
-          
-          // defining threshold scale
-          var threshs = t_domains[stat];
-          var threshold = d3.scaleThreshold()
-            .domain(threshs)
-            .range(blue_colors);
-          d3.selectAll('#poverty-legend rect').style('fill', function(d, i) {
-            return blue_colors[i];
-          });
-            
-          // change legend text
-          for (var i = 0; i < threshs.length; i++) {
-            $('#poverty-legend-text-'+(i+2)).text(threshs[i].toFixed() + '%');  
-          }
-          
-          // color map
-          poverty_svg.selectAll('.county').transition().duration(750).style('fill', function(d, i) {
-            if (county_stats[2012].hasOwnProperty(+d.id)) {
-              var value = +county_stats[2012][+d.id][stat];
-              return (isNaN(value) || value === "") ? na_color : threshold(value);
-            } else return na_color;
-          });
-          
-          // update average text
-          var avg_value = +state_stats[2012][0][stat];
-          avg_text = 'National Average: ' + avg_value.toFixed(1) + '%';
-          $('#poverty-average-text').html(avg_text);
-        };
-        
-        updateMap('total');
-      
-        // hover behavior
-        $('.county').on('mouseover', function() {
-          var state_fips = Math.floor(d3.select(this).datum().id / 1000);
-          var val = +state_stats[2012][state_fips][curr_stat];
-          $('#poverty-average-text').html(state_stats[2012][state_fips].name + ' State Average: ' + val.toFixed(1) + '%');
-        });
-        $('.county').on('mouseout', function() {
-          $('#poverty-average-text').html(avg_text);
-        });
-      
-        // dropdown behavior
-        $('#poverty-dropdown-container a').click(function(e) {
-          e.preventDefault();
-          $('#poverty-dropdown-title').text($(this).text());
-          updateMap($(this).attr('stat'));
-        }); 
-      };
-      
-      const [us, poverty, povertyAverage] = await Promise.all([
+      const [us, pov_data, pa_data] = await Promise.all([
         d3.json('/data/us.json'),
         d3.tsv('/data/poverty.tsv'),
         d3.tsv('/data/poverty_average.tsv'),
       ]);
-      pov_data_ready(null, us, poverty, povertyAverage);
+      
+      // drawing the map
+      var counties = topojson.feature(us, us.objects.counties).features;
+      var states = topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; });    
+      poverty_svg.append('g')
+        .attr('class', 'counties')
+        .selectAll('path')
+          .data(counties)
+        .enter().append('path')
+          .attr('class', 'county')
+          .attr('d', path);   
+      poverty_svg.append("path").datum(states)
+        .attr("class", "states")
+        .attr("d", path);
+        
+      // organizing data
+      for (var i = 0; i < pov_data.length; i++) {
+        var year = +pov_data[i].year;
+        var fips = +pov_data[i].fips;
+        if (!this.countyStats.hasOwnProperty(year)) this.countyStats[year] = {};
+        this.countyStats[year][fips] = pov_data[i];
+      } 
+      
+      for (var i = 0; i < pa_data.length; i++) {
+        var year = +pa_data[i].year;
+        var fips = +pa_data[i].fips;
+        if (!this.stateStats.hasOwnProperty(year)) this.stateStats[year] = {};
+        this.stateStats[year][fips] = pa_data[i];
+      }
+      
+      this.updateMap();
+    
+      // hover behavior
+      $('.county').on('mouseover', function() {
+        var state_fips = Math.floor(d3.select(this).datum().id / 1000);
+        var val = +this.stateStats[2012][state_fips][this.stat];
+        this.averageText = this.stateStats[2012][state_fips].name + ' State Average: ' + val.toFixed(1) + '%';
+      });
+      $('.county').on('mouseout', function() {
+        this.averageText = `National Average: ${this.nationalAverage}`;
+      });
+    },
+
+    updateMap() {
+      const { stat } = this;
+      
+      // defining threshold scale
+      var threshs = t_domains[stat];
+      var threshold = d3.scaleThreshold()
+        .domain(threshs)
+        .range(blue_colors);
+      d3.selectAll('#poverty-legend rect').style('fill', function(d, i) {
+        return blue_colors[i];
+      });
+        
+      // change legend text
+      for (var i = 0; i < threshs.length; i++) {
+        $('#poverty-legend-text-'+(i+2)).text(threshs[i].toFixed() + '%');  
+      }
+      
+      // color map
+      d3.select('#poverty-map').select('svg')
+        .selectAll('.county')
+        .transition()
+        .duration(750)
+        .style('fill', (d, i) => {
+          if (this.countyStats[2012].hasOwnProperty(+d.id)) {
+            var value = +this.countyStats[2012][+d.id][stat];
+            return (isNaN(value) || value === "") ? na_color : threshold(value);
+          } else return na_color;
+        });
+      
+      // update average text
+      var avg_value = +state_stats[2012][0][stat];
+      this.nationalAverage = avg_value.toFixed(1) + '%';
+      this.averageText = `National Average: ${this.nationalAverage}`;
+    },
+
+    handleDropdownChange(option) {
+      this.stat = option.stat;
+      this.statLabel = option.label;
+      this.updateMap();
     },
   },
 };
@@ -311,6 +324,11 @@ export default {
     right: 0px;
     bottom: 0px;
   }
+  .dropdown-toggle {
+    border: 1px solid #c0c0c0;
+    font-size: 13px;
+  }
+  .dropdown-item { font-size: 13px; }
 
   @media (max-width: 700px) {
     #poverty-legend {
