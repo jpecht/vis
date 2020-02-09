@@ -142,8 +142,10 @@ export default {
       const { linksData, nodesData } = await this.retrieveData();
 
       const simulation = d3.forceSimulation(nodesData)
-        .force('charge', d3.forceManyBody().strength(-15))
-        .force('center', d3.forceCenter(this.chart.width / 2, this.chart.height / 2))
+        .force('charge', d3.forceManyBody().theta(0.8).strength(-100))
+        // .force('collision', d3.forceCollide().strength(0.8))
+        .force('x', d3.forceX(this.chart.width / 2).strength(0.5))
+        .force('y', d3.forceY(this.chart.height / 2).strength(0.5))
         .force('link', d3.forceLink(linksData));
 
       // draw nodes and links
