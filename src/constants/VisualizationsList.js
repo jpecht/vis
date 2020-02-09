@@ -1,5 +1,12 @@
 export default [
   {
+    title: 'Facebook Friend Network',
+    subtitle: 'force layout diagram of my facebook friends',
+    date: 'Feb 4, 2020',
+    url: 'facebook-network',
+    imageFilename: 'fb_force_ss.png',
+  },
+  {
     title: 'Songs over Time by BPM',
     subtitle: 'my music collection over time by bpm',
     date: 'Jul 10, 2017',
@@ -40,13 +47,6 @@ export default [
     date: 'Dec 25, 2014',
     url: 'fantasy-football-performance',
     imageFilename: 'ff_performance_ss.png',
-  },
-  {
-    title: 'Facebook Friend Network',
-    subtitle: 'force layout diagram of my facebook friends',
-    date: 'Nov 21, 2014',
-    url: 'facebook-network',
-    imageFilename: 'fb_force_ss.png',
   },
   {
     title: 'BPM Visual',

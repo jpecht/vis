@@ -11,15 +11,18 @@
     </div>
     <template v-slot:post-description>
       <p>
-        You can see vague horizontal lines around the more popular BPMs (128, 130, 140, 150, and 160).
+        You can see vague horizontal lines around the more popular BPMs
+        (128, 130, 140, 150, and 160).
         The line is especially prominent in 2011-2014 around 140 BPM mark,
         probably due to the big rise in dubstep around that time.
-        The blob in the beginning of 2011 around the 125-132 BPM range shows my discovery of progressive house.
-        And near the end of the timeline, you can see I get more interested in the 150 BPM trap-style songs.
+        The blob in the beginning of 2011 around the 125-132 BPM range shows
+        my discovery of progressive house.
+        And near the end of the timeline, you can see I get more interested in the 150 BPM
+        trap-style songs.
       </p>
       <p>
-        I'm pretty sure I started collecting around 2005, but I think when I changed computers mid-2010,
-        a lot of songs picked up that 2010 upload date, hence the thick line there.
+        I'm pretty sure I started collecting around 2005, but I think when I changed computers
+        mid-2010, a lot of songs picked up that 2010 upload date, hence the thick line there.
         You can also see when I was computer-less for a couple months in 2015.
         And lastly, you can see I started downloading much more frequently starting mid-2016
         when I moved to Boulder and started DJing more.
@@ -46,7 +49,12 @@ export default {
   },
   methods: {
     async createVis() {
-      const margin = { top: 5, right: 10, bottom: 40, left: 45 };
+      const margin = {
+        top: 5,
+        right: 10,
+        bottom: 40,
+        left: 45,
+      };
       const width = 550 - margin.left - margin.right;
       const height = 260 - margin.top - margin.bottom;
 
@@ -62,12 +70,14 @@ export default {
         .domain([87.5, 175])
         .range([height, 0]);
 
-
       const rawData = await d3.tsv('/data/music_collection_070917.tsv');
 
       // filter out songs without bpm
-      const data = rawData.filter(d => !isNaN(d.BPM))
-      data.forEach(d => d.importDate = new Date(d['Import Date']));
+      let data = rawData.filter(d => !Number.isNaN(d.BPM));
+      data = data.map(d => ({
+        ...d,
+        importDate: new Date(d['Import Date']),
+      }));
       data.sort((a, b) => a.importDate - b.importDate);
 
       // set time scale
@@ -129,7 +139,7 @@ export default {
         .duration(sliderTimeLength)
         .attrTween('x1', () => t => t * width)
         .attrTween('x2', () => t => t * width)
-        .on('end', function() {
+        .on('end', function hide() {
           d3.select(this).style('display', 'none');
         });
       songs
@@ -139,9 +149,7 @@ export default {
           .delay(d => sliderTimeLength * x(d.importDate) / width)
         .transition()
           .duration(5000)
-          .styleTween('fill', () => {
-            return d3.interpolateRgb('steelblue', '#777');
-          });
+          .styleTween('fill', () => d3.interpolateRgb('steelblue', '#777'));
     },
   },
 };

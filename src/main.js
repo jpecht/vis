@@ -12,6 +12,7 @@ import 'vue-slider-component/theme/default.css';
 
 // Import global CSS
 import '@/styles/vendor.scss';
+import '@/styles/main.scss';
 
 Vue.config.productionTip = false;
 

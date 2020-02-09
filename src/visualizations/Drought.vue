@@ -3,9 +3,11 @@
     <template v-slot:description>
       <p>A quick look at the severity of the recent drought in California</p>
       <p>
-        <span style="font-weight:600;">Note:</span>
-        This chart was broken in its port to Vue.
-        It was made in 2014 and relied on Chart.js v1.0.1, which is not compatible with Vue.
+        <b>Note:</b>
+        <i>
+          This chart was broken in its port to Vue.
+          It was made in 2014 and relied on Chart.js v1.0.1, which is not compatible with Vue.
+        </i>
       </p>
     </template>
     <div class="drought-chart-wrapper">

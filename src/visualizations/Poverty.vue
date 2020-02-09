@@ -17,11 +17,6 @@
         particularly in the southwest region as well and the East Kentucky region. Otherwise, for the minority races, the distribution looks pretty scattered. 
         It'd be interesting to see if there's a significant difference between urban and rural areas.
       </p>
-      <p>
-        <span style="font-weight:600;">Note:</span>
-        The dropdown no longer displays correctly after porting this vis to Vue.
-        You can still click the buttons to view different indicators though.
-      </p>
     </template>
     <div id="poverty-map-wrapper" class="map-wrapper">
       <div id="poverty-map" class="us-map"></div>

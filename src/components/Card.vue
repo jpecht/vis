@@ -1,8 +1,8 @@
 <template>
-  <div class="container">
+  <div class="cardContainer">
     <router-link :to="url">
       <div
-        class="card"
+        class="cardBox"
         :style="{
           background: `url(${require(`@/assets/images/screenshots/${imageFilename}`)}) no-repeat`,
         }"
@@ -62,7 +62,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.container {
+.cardContainer {
   display: inline-block;
   height: 420px;
   margin: 20px 10px 0;
@@ -70,7 +70,7 @@ export default {
   width: 420px;
 }
 
-.card {
+.cardBox {
   background-position: center;
   background-size: contain;
   border-radius: 15px;

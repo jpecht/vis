@@ -1,6 +1,13 @@
 <template>
-  <Post v-bind="info">
+  <Post v-bind="postInfo">
     <template v-slot:description>
+      <p>
+        <b>Note:</b>
+        <i>
+          This is a refresh of an old post I did back in October 2014.
+          I used the same data but I'm now using d3.js v5.
+        </i>
+      </p>
       <p>
         The chart below presents my network of facebook friends.
         Each node is a facebook friend and each link represents a friendship.
@@ -17,7 +24,11 @@
       </p>
     </template>
     <div class="facebook-chart-container">
-      <svg class="chart"></svg>
+      <svg
+        ref="chart"
+        :height="chart.height"
+        :width="chart.width"
+      />
       <div class="row">
         <div class="chart-info col-xs-6"></div>
         <div class="col-xs-6 legend">
@@ -49,42 +60,153 @@ import Post from '@/components/Post.vue';
 import * as d3 from 'd3';
 import visualizations from '@/constants/VisualizationsList';
 
+// Constants
+const FB_NAME = 'Jeff Mowgli';
+const nodeRadius = 5;
+
+// Chart colors
+const nodeStrokeColor = '#e0e0e0';
+const highNodeStrokeColor = '#333';
+const linkColor = '#aaa';
+const highLinkColor = '#000';
+
+// Scales
+const mutualScale = d3.scaleThreshold()
+  .domain([3, 5, 10, 30, 50])
+  .range([
+    'rgb(199, 233, 192)',
+    'rgb(161, 217, 155)',
+    'rgb(116, 196, 118)',
+    'rgb(65, 171, 93)',
+    'rgb(35, 139, 69)',
+    'rgb(0, 90, 50)',
+  ]);
+
 export default {
   name: 'FacebookNetwork',
   components: {
     Post,
   },
   data: () => ({
-    info: visualizations.find(v => v.url === 'facebook-network'),
+    chart: {
+      height: 600,
+      width: 650,
+    },
+    infoText: '',
+    postInfo: visualizations.find(v => v.url === 'facebook-network'),
+    selectedName: '',
+    selectedNumMutual: 0,
   }),
   mounted() {
     this.createVis();
   },
   methods: {
+    async retrieveData() {
+      let [nodesData, linksData] = await Promise.all([
+        d3.tsv('/data/fb_friends.tsv'),
+        d3.tsv('/data/fb_mutual_friends.tsv'),
+      ]);
+
+      nodesData.shift(); // cut out myself
+
+      // attach important info to nodesData (number of mutual friends, name)
+      const lookup = {};
+      nodesData = nodesData.map((node, i) => {
+        lookup[node.uid2] = i;
+        return {
+          ...node,
+          name: node.uid2,
+          numMutual: 0,
+        };        
+      });
+      
+      // create links using the lookup built
+      const links = [];
+      linksData.forEach((link) => {
+        if (link.uid1 !== FB_NAME && link.uid2 !== FB_NAME) {
+          const sourceInd = lookup[link.uid1];
+          const targetInd = lookup[link.uid2];
+          links.push({ source: sourceInd, target: targetInd });
+          
+          nodesData[sourceInd].numMutual++;
+          nodesData[targetInd].numMutual++;
+        }
+      });
+
+      return { linksData: links, nodesData };
+    },
+
     async createVis() {
-      var FB_NAME = 'Jeff Mowgli';
+      const { chart } = this.$refs;
 
-      var width = 650, height = 600;
-      
-      var nodeStrokeColor = '#E0E0E0',
-        highNodeStrokeColor = '#333';
-      var linkColor = '#AAA',
-        highLinkColor = '#000';
-      
-      var chart = d3.select('.chart')
-        .attr('width', width)
-        .attr('height', height);
+      const { linksData, nodesData } = await this.retrieveData();
 
-      var force = d3.forceSimulation()
-        .force('charge', d3.forceManyBody());
-        
-      var mutualScale = d3.scaleThreshold()
-        .domain([3, 5, 10, 30, 50])
-        .range(['rgb(199,233,192)','rgb(161,217,155)','rgb(116,196,118)','rgb(65,171,93)','rgb(35,139,69)','rgb(0,90,50)']);
-      
-      var defaultInfoText = '&nbsp;';
-      var infoText = defaultInfoText;
+      const simulation = d3.forceSimulation(nodesData)
+        .force('charge', d3.forceManyBody().strength(-15))
+        .force('center', d3.forceCenter(this.chart.width / 2, this.chart.height / 2))
+        .force('link', d3.forceLink(linksData));
 
+      // draw nodes and links
+      const link = d3.select(chart).selectAll('.link')
+        .data(linksData)
+        .join('line')
+          .attr('class', 'link')
+          .style('stroke', linkColor);
+
+      const node = d3.select(chart).selectAll('.node')
+        .data(nodesData)
+        .enter().append('circle')
+          .attr('class', 'node')
+          .attr('r', nodeRadius)
+          .style('stroke', nodeStrokeColor)
+          .attr('fill', (d) => {
+            if (d.name === 'Caitlin Farrell') return 'steelblue';
+            if (d.numMutual === 0) return '#999';
+            return mutualScale(d.numMutual);
+          })
+          .on('mouseover', (d) => {
+            this.setInfoText(d);
+          })
+          .on('mouseout', () => {
+            this.setInfoText();
+          })
+          .on('click', (d) => {
+            d3.event.stopPropagation();
+            d3.selectAll('.node').style('stroke', nodeStrokeColor);
+            d3.select(this).style('stroke', highNodeStrokeColor);
+            
+            d3.selectAll('.link')
+              .style('stroke', linkColor)
+              .filter(linkDatum => (
+                linkDatum.source.index === d.index || linkDatum.target.index === d.index
+              ))
+                .style('stroke', highLinkColor);
+              
+            this.setInfoText(d);
+          })
+          .call(this.dragSimulator(simulation));
+
+
+      // begin simulation
+      simulation.on('tick', () => {
+        node.attr('transform', (d) => {
+          d.x = Math.max(nodeRadius, Math.min(this.chart.width - nodeRadius, d.x));
+          d.y = Math.max(nodeRadius, Math.min(this.chart.height - nodeRadius, d.y));
+          return `translate(${d.x}, ${d.y})`;
+        });
+        // node.attr('transform', d => `translate(${d.x}, ${d.y})`);
+        link
+          .attr('x1', d => d.source.x)
+          .attr('y1', d => d.source.y)
+          .attr('x2', d => d.target.x)
+          .attr('y2', d => d.target.y);
+      });
+
+      // Clear selected when clicking on the chart itself
+      // d3.select(chart).on('click', this.clearSelected);
+    },
+
+    drawLegend() {
       // draw legend
       var rect_width = 30, rect_height = 10;
       var legend_data = mutualScale.range();
@@ -111,140 +233,59 @@ export default {
           else if (i === legend_data.length - 1) return '150';
           else return mutualScale.domain()[i-1];
         });
-      
-      var dataReady = function(error, nodesData, linksData) {
-        nodesData.shift(); // cut out myself
+    },
 
-        // attach important info to nodesData (number of mutual friends, name)
-        var lookup = {};
-        for (var i = 0; i < nodesData.length; i++) {
-          nodesData[i].numMutual = 0;
-          nodesData[i].name = nodesData[i].uid2;
-          
-          lookup[nodesData[i].uid2] = i;
-        }
-        
-        // create links using the lookup built
-        var links = [];
-        for (var j = 0; j < linksData.length; j++) {
-          if (linksData[j].uid1 !== FB_NAME && linksData[j].uid2 !== FB_NAME) {
-            var sourceInd = lookup[linksData[j].uid1];
-            var targetInd = lookup[linksData[j].uid2];
-            links.push({source: sourceInd, target: targetInd});
-            
-            nodesData[sourceInd].numMutual++;
-            nodesData[targetInd].numMutual++;
-          }
-        }
+    clearSelected() {
+      d3.selectAll('.node').style('stroke', nodeStrokeColor);
+      d3.selectAll('.link').style('stroke', linkColor);
+      this.setInfoText();
+    },
 
-        force.nodes(nodesData);
-        force.force('link').links(links);  
-            
-        var link = chart.selectAll('.link')
-          .data(links)
-          .enter().append('line')
-            .attr('class', 'link')
-            .style('stroke', linkColor);
-
-        var node = chart.selectAll('.node')
-          .data(nodesData)
-          .enter().append('circle')
-            .attr('class', 'node')
-            .attr('r', 5)
-            .style('stroke', nodeStrokeColor)
-            .attr('fill', function(d) {
-              if (d.name === 'Caitlin Farrell') return 'steelblue';
-              else if (d.numMutual === 0) return '#999';
-              else return mutualScale(d.numMutual);
-            })
-            .on('mouseover', function(d) {
-              var info = infoTextize(d);
-              d3.select('.chart-info').html(info);
-            })
-            .on('mouseout', function() {
-              d3.select('.chart-info').html(infoText);
-            })
-            .on('click', function(d) {
-              d3.event.stopPropagation();
-              d3.selectAll('.node').style('stroke', nodeStrokeColor);
-              d3.select(this).style('stroke', highNodeStrokeColor);
-              
-              d3.selectAll('.link').style('stroke', linkColor)
-                .filter(function(linkDatum) {
-                  return linkDatum.source.index === d.index || linkDatum.target.index === d.index;
-                }).style('stroke', highLinkColor);
-                
-              infoText = infoTextize(d);
-              d3.select('.chart-info').html(infoText);
-            })
-            .call(force.drag);
-            
-        // reset; clear node focus
-        chart.on('click', function() {
-          d3.selectAll('.node').style('stroke', nodeStrokeColor);
-          d3.selectAll('.link').style('stroke', linkColor);
-          
-          infoText = defaultInfoText;
-          d3.select('.chart-info').html(infoText);
+    dragSimulator(simulation) {
+      return d3.drag()
+        .on('start', (d) => {
+          if (!d3.event.active) simulation.alphaTarget(.03).restart();
+          d.fx = d.x;
+          d.fy = d.y;
+        })
+        .on('drag', (d) => {
+          d.fx = d3.event.x;
+          d.fy = d3.event.y;
+        })
+        .on('end', (d) => {
+          if (!d3.event.active) simulation.alphaTarget(.03);
+          d.fx = null;
+          d.fy = null;
         });
-            
-        // allow dynamic force layout movement
-        force.on('tick', function() {
-          link
-            .attr('x1', function(d) { return d.source.x; })
-            .attr('y1', function(d) { return d.source.y; })
-            .attr('x2', function(d) { return d.target.x; })
-            .attr('y2', function(d) { return d.target.y; });
+    },
 
-          node
-            .attr('cx', function(d) { return d.x; })
-            .attr('cy', function(d) { return d.y; });
-        });
-      };
-      
-      var infoTextize = function(d) {
-        return d.uid2 + ': ' + d.numMutual + ' mutual friends';
-      };
-      
-      const [nodesData, linksData] = await Promise.all([
-        d3.tsv('/data/fb_friends.tsv'),
-        d3.tsv('/data/fb_mutual_friends.tsv'),
-      ]);
-      dataReady(null, nodesData, linksData);
+    setInfoText(d) {
+      this.infoText = d
+        ? `${d.uid2}: ${d.numMutual} mutual friends`
+        : '';
     },
   },
 };
 </script>
 
 <style lang="scss">
-@import '~@/styles/legacy/bootstrap-partial.css';
-
-.fantasy-football-performance-wrapper {
-  font-size: 14px;
-
-  #ff-table {
-    border-collapse: collapse;
-  }
-
-  .cell {
-    font-size: 0.7em;
-    border: 1px solid #CCC;
-    padding: 2px;
-    max-width: 75px;
-  }
-
-  #ff-2-legend {
-    text-align: center;
-    margin-top: 25px;
-  }
-  .legend-text {
-    font-size: 12px;
-  }
-
-  #ff-2-source {
-    font-size: 11px;
-    margin-top: 10px;
-    text-align: right;
-  }
+.chart { border: 1px solid #ccc; }
+.node {
+  stroke-width: 1px;
 }
+.link {
+  stroke-width: 1;
+  stroke-opacity: .6;
+}
+.chart-info {
+  font-weight: 400;
+  margin-top: 10px;
+  text-align: center;
+}
+.legend {
+  margin-top: 10px;
+  text-align: center;
+}
+.legend text { text-anchor: middle; }
+.legend-text { margin-top: -5px; }
 </style>
