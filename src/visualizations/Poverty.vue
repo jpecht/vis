@@ -60,7 +60,12 @@
         </div>
       </div>
       <div id="poverty-average-text">
-        {{ averageText }}
+        <span v-if="averageMode === 'national'">
+          National Average: {{ nationalAverage }}
+        </span>
+        <span v-else>
+          {{ averageText }}
+        </span>
       </div>
       <div id="poverty-source" class="source map-source">Source: U.S. Census Bureau</div>
     </div>
@@ -69,6 +74,7 @@
 
 <script>
 import Post from '@/components/Post.vue';
+import Vue from 'vue';
 import * as d3 from 'd3';
 import * as topojson from 'topojson';
 import $ from 'jquery';
@@ -116,6 +122,7 @@ export default {
     Post,
   },
   data: () => ({
+    averageMode: 'national',
     averageText: '',
     countyStats: {},
     dropdownOptions,
@@ -184,13 +191,15 @@ export default {
       this.updateMap();
     
       // hover behavior
+      const self = this;
       $('.county').on('mouseover', function() {
         var state_fips = Math.floor(d3.select(this).datum().id / 1000);
-        var val = +this.stateStats[2012][state_fips][this.stat];
-        this.averageText = this.stateStats[2012][state_fips].name + ' State Average: ' + val.toFixed(1) + '%';
+        var val = +self.stateStats[2012][state_fips][self.stat];
+        self.averageMode = 'state';
+        self.averageText = self.stateStats[2012][state_fips].name + ' State Average: ' + val.toFixed(1) + '%';
       });
-      $('.county').on('mouseout', function() {
-        this.averageText = `National Average: ${this.nationalAverage}`;
+      $('.county').on('mouseout', () => {
+        this.averageMode = 'national';
       });
     },
 
@@ -224,9 +233,8 @@ export default {
         });
       
       // update average text
-      var avg_value = +state_stats[2012][0][stat];
+      var avg_value = +this.stateStats[2012][0][stat];
       this.nationalAverage = avg_value.toFixed(1) + '%';
-      this.averageText = `National Average: ${this.nationalAverage}`;
     },
 
     handleDropdownChange(option) {

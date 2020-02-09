@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="contentContainer">
     <div class="content">
       <div class="post">
         <span class="date">{{ date }}</span>
@@ -45,7 +45,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.container {
+.contentContainer {
   background: url('~@/assets/images/blue_gradient.jpg') no-repeat center;
   background-size: cover;
   left: 0px;
