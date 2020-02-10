@@ -5,7 +5,7 @@
         <b>Note:</b>
         <i>
           This is a refresh of an old post I did back in October 2014.
-          I used the same data but I'm now using d3.js v5.
+          I used the same data but d3.js v5 is now being used.
         </i>
       </p>
       <p>

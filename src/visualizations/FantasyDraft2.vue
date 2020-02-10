@@ -71,9 +71,9 @@ export default {
           var player_cell = (i % 2 === 0) ? row.append('td') : row.insert('td', ':first-child');
           player_cell
             .datum(data[10*i + j])
-            .attr('class', 'player cell')
-            .attr('title', function(d) {
-              return '<strong>' + d.player + ', ' + d.pos + ' (' + d.team + ')</strong><br>Picked: ' + d.pick + '<br>Avg Pick: ' + d.avg + '<br>Diff: <span style="color:'+ tt_scale(d.diff) +';">' + d.diff + '</span>';
+            .attr('class', 'player cell tooltip-multiline')
+            .attr('data-tooltip', function(d) {
+              return '' + d.player + ', ' + d.pos + ' (' + d.team + ')\nPicked: ' + d.pick + '<br>Avg Pick: ' + d.avg + '<br>Diff: <span style="color:'+ tt_scale(d.diff) +';">' + d.diff + '</span>';
             })
             .style('cursor', 'default')
             .style('background-color', function(d) {

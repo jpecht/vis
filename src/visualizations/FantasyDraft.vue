@@ -21,8 +21,8 @@
         I imagine some teams would appear towards the top more than others.
       </p>
       <p>
-        <span style="font-weight:600;">Note:</span>
-        The tooltips that appear on hover do not work anymore after porting this vis to Vue.
+        <b>Note:</b>
+        <i>The tooltips that appear on hover do not work anymore after porting this vis to Vue.</i>
       </p>
     </template>
     <div class="fantasy-draft-wrapper">
@@ -105,7 +105,7 @@ export default {
         .data(data)
         .enter().append('g')
           .attr('class', 'player')
-          .attr('title', function(d) {
+          .attr('data-tooltip', function(d) {
             return '<strong>' + d.player + ', ' + d.pos + ' (' + d.team + ')</strong><br>Avg Pick: ' + d.pick + '<br>Avg Auction Value: $' + d.value + '<br>Ownership: ' + d.own + '%';
           })
           .attr('transform', function(d) {
@@ -164,14 +164,6 @@ export default {
         .on('mouseout', function() {
           d3.select(this.parentNode).select('circle').transition().attr('r', 20);
         });
-          
-      /* var tooltipTimer; 
-      $('.player').tooltipster({
-        theme: 'tooltipster-light',
-        offsetX: 19,
-        content: $(this).attr('title'),
-        contentAsHTML: true
-      }); */
     },
   },
 };
