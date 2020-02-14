@@ -103,5 +103,10 @@ export default new Router({
       name: 'tv-show-viewership',
       component: () => import('./visualizations/TvShowViewership.vue'),
     },
+    {
+      path: '/weather',
+      name: 'weather',
+      component: () => import('./visualizations/Weather.vue'),
+    },
   ],
 });

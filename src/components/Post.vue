@@ -1,7 +1,7 @@
 <template>
   <div class="contentContainer">
     <div class="content">
-      <div class="post">
+      <div :class="['post', { wide }]">
         <span class="date">{{ date }}</span>
         <h3 class="title">{{ title }}</h3>
         <h4
@@ -40,6 +40,10 @@ export default {
       type: String,
       default: '',
     },
+    wide: {
+      type: Boolean,
+      default: false,
+    },
   },
 };
 </script>
@@ -74,6 +78,8 @@ export default {
   text-align: left;
   width: 100%;
 }
+
+.post.wide { max-width: 900px; }
 
 .title {
   font-size: 24px;

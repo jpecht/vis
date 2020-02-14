@@ -1,5 +1,12 @@
 export default [
   {
+    title: 'Weather in Boulder',
+    subtitle: 'a look at the weather in 2019',
+    date: 'Feb 20, 2020',
+    url: 'weather',
+    imageFilename: 'fb_force_ss.png',
+  },
+  {
     title: 'Facebook Friend Network',
     subtitle: 'force layout diagram of my facebook friends',
     date: 'Feb 4, 2020',
