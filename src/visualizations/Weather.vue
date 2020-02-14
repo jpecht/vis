@@ -25,6 +25,7 @@ const margin = {
   bottom: 30,
   left: 30,
 };
+const rectWidth = 2;
 
 const dateParse = d3.timeParse('%Y-%m-%d');
 
@@ -41,7 +42,13 @@ export default {
   },
   methods: {
     async createVis() {
-      const weather = await d3.csv('/data/weather_2019.csv');
+      const [weather, boulderWeatherRecords] = await Promise.all([
+        d3.csv('/data/weather_2019.csv'),
+        d3.csv('/data/boulder_weather_records_2019.csv'),
+      ]);
+
+      console.log(boulderWeatherRecords);
+
       const boulderWeather = weather.filter(d => d.STATION === 'USC00050848');
       // const dcWeather = weather.filter(d => d.STATION === 'USC00186350');
       // const denverWeather = weather.filter(d => d.STATION === 'USW00023062');
@@ -81,13 +88,39 @@ export default {
         .call(xAxis);
       chart.append('g').call(yAxis);
 
+      // Draw max-avg-min shading
+      const highOverlay = chart.append('g').selectAll('rect')
+        .data(boulderWeatherRecords)
+        .join('rect')
+          .attr('x', d => x(new Date(2019, d.Month - 1, d.Day)))
+          .attr('y', d => y(d.HighMax))
+          .attr('width', rectWidth)
+          .attr('height', d => y(d.AvgTMax) - y(d.HighMax))
+          .attr('fill', 'rgba(255, 152, 150, 0.5)');
+      const avgOverlay = chart.append('g').selectAll('rect')
+        .data(boulderWeatherRecords)
+        .join('rect')
+          .attr('x', d => x(new Date(2019, d.Month - 1, d.Day)))
+          .attr('y', d => y(d.AvgTMax))
+          .attr('width', rectWidth)
+          .attr('height', d => y(d.AvgTMin) - y(d.AvgTMax))
+          .attr('fill', 'rgba(150, 150, 150, 0.4)');
+      const lowOverlay = chart.append('g').selectAll('rect')
+        .data(boulderWeatherRecords)
+        .join('rect')
+          .attr('x', d => x(new Date(2019, d.Month - 1, d.Day)))
+          .attr('y', d => y(d.AvgTMin))
+          .attr('width', rectWidth)
+          .attr('height', d => y(d.LowMin) - y(d.AvgTMin))
+          .attr('fill', 'rgba(174, 199, 232, 0.5)');
+
       // Draw temperature bars
       const tempBars = chart.append('g').selectAll('rect')
         .data(boulderWeather)
         .join('rect')
           .attr('x', d => x(dateParse(d.DATE)))
           .attr('y', d => y(d.TMAX))
-          .attr('width', 2)
+          .attr('width', rectWidth)
           .attr('height', d => y(d.TMIN) - y(d.TMAX))
           .attr('fill', 'rgb(80, 80, 80)');
     },
