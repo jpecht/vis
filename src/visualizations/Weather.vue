@@ -8,8 +8,30 @@
         in Boulder, CO.
       </p>
     </template>
-    <svg ref="winterChart" />
-    <svg ref="summerChart" />
+    <div class="buttonContainer">
+      <button class="button" @click="changeLocation(locations.boulder)">
+        Boulder
+      </button>
+      <button class="button" @click="changeLocation(locations.dc)">
+        DC
+      </button>
+    </div>
+    <svg
+      v-for="chartRef in chartRefs"
+      :height="chart.height + chart.margin.top + chart.margin.bottom"
+      :width="chart.width + chart.margin.left + chart.margin.right"
+      :ref="chartRef"
+    >
+      <g :transform="`translate(${chart.margin.left}, ${chart.margin.top})`">
+        <g class="grid" />
+        <g class="xAxis" />
+        <g class="yAxis" />
+        <g class="highOverlay" />
+        <g class="avgOverlay" />
+        <g class="lowOverlay" />
+        <g class="tempBars" />
+      </g>
+    </svg>
   </Post>
 </template>
 
@@ -46,48 +68,54 @@ export default {
     Post,
   },
   data: () => ({
+    chart: {
+      height,
+      margin,
+      width,
+    },
+    chartRefs: [
+      'winterChart',
+      'summerChart',
+    ],
     info: visualizations.find(v => v.url === 'weather'),
     location: locations.boulder,
+    locations,
+    weather: null,
+    weatherRecords: null,
   }),
 
+  computed: {
+    stationId() {
+      if (this.location === locations.boulder) return 'USC00050848';
+      if (this.location === locations.dc) return 'USC00186350';
+      return '';
+    },
+  },
+
   async mounted() {
-    const [weather, weatherRecords] = await Promise.all([
+    [this.weather, this.weatherRecords] = await Promise.all([
       d3.csv('/data/weather.csv'),
       d3.tsv('/data/weather_records.tsv'),
     ]);
 
-    const winterWeather = this.getWeatherData(weather, this.location, winterDates);
-    const summerWeather = this.getWeatherData(weather, this.location, summerDates);
-    const winterRecordData = this.getWeatherRecordData(weatherRecords, this.location, winterDates);
-    const summerRecordData = this.getWeatherRecordData(weatherRecords, this.location, summerDates);
-
-    this.createChart(this.$refs.winterChart, winterWeather, winterRecordData, {
-      tempRange: [-30, 100],
-      timeRange: winterDates,
-    });
-    this.createChart(this.$refs.summerChart, summerWeather, summerRecordData, {
-      tempRange: [0, 110],
-      timeRange: summerDates,
-    });
+    this.updateCharts();
   },
 
   methods: {
-    getStationId(location) {
-      if (location === locations.boulder) return 'USC00050848';
-      if (location === locations.dc) return 'USC00186350';
-      return '';
+    changeLocation(location) {
+      this.location = location;
+      this.updateCharts();
     },
 
-    getWeatherData(data, location, dates) {
-      const stationId = this.getStationId(location);
-      return data.filter((d) => {
+    getWeatherData(dates) {
+      return this.weather.filter((d) => {
         d.parsedDate = dateParse(d.DATE);
-        return d.STATION === stationId && d.parsedDate > dates[0] && d.parsedDate < dates[1];
+        return d.STATION === this.stationId && d.parsedDate > dates[0] && d.parsedDate < dates[1];
       });
     },
 
-    getWeatherRecordData(data, location, dates) {
-      return data.filter((d) => {
+    getWeatherRecordData(dates) {
+      return this.weatherRecords.filter((d) => {
         let inTimeRange = false;
         [2018, 2019].forEach((year) => {
           const date = new Date(year, d.Month - 1, d.Day);
@@ -96,16 +124,16 @@ export default {
             d.parsedDate = date;
           }
         });
-        return d.Location === location && inTimeRange;
+        return d.Location === this.location && inTimeRange;
       });
     },
 
-    createChart(chartElement, weatherData, weatherRecordsData, { tempRange, timeRange }) {
-      const chart = d3.select(chartElement)
-        .attr('width', width + margin.left + margin.right)
-        .attr('height', height + margin.top + margin.bottom)
-        .append('g')
-          .attr('transform', `translate(${margin.left}, ${margin.top})`);
+    updateChart(chartElement, { tempRange, timeRange }) {
+      const weatherData = this.getWeatherData(timeRange);
+      const weatherRecordsData = this.getWeatherRecordData(timeRange);
+
+      const chartContainer = d3.selectAll(chartElement);
+      const chart = chartContainer.select('g');
 
       const x = d3.scaleTime()
         .domain(timeRange)
@@ -122,23 +150,23 @@ export default {
       for (let i = tempRange[0] + 10; i <= tempRange[1]; i += 10) {
         gridLineData.push(i);
       }
-      chart.append('g').selectAll('line')
+      chart.select('.grid').selectAll('line')
         .data(gridLineData)
         .join('line')
           .attr('x2', width)
           .attr('y1', d => y(d))
           .attr('y2', d => y(d))
           .style('stroke', 'rgba(150, 150, 150, 0.5)')
-          .style('stroke-width', d => (d === 0) ? 3 : 1);
+          .style('stroke-width', d => (d === 0) ? 2 : 1);
 
       // Draw axes
-      chart.append('g')
+      chart.select('.xAxis')
         .attr('transform', `translate(0, ${height})`)
         .call(xAxis);
-      chart.append('g').call(yAxis);
+      chart.select('.yAxis').call(yAxis);
 
       // Draw max-avg-min shading
-      const highOverlay = chart.append('g').selectAll('rect')
+      const highOverlay = chart.select('.highOverlay').selectAll('rect')
         .data(weatherRecordsData)
         .join('rect')
           .attr('x', d => x(d.parsedDate))
@@ -146,7 +174,7 @@ export default {
           .attr('width', d => x(d.parsedDate) - x(d.parsedDate - ONE_DAY))
           .attr('height', d => y(d.NormalDailyMax) - y(d.DailyRecordMax))
           .attr('fill', 'rgba(255, 152, 150, 0.5)');
-      const avgOverlay = chart.append('g').selectAll('rect')
+      const avgOverlay = chart.select('.avgOverlay').selectAll('rect')
         .data(weatherRecordsData)
         .join('rect')
           .attr('x', d => x(d.parsedDate))
@@ -154,7 +182,7 @@ export default {
           .attr('width', d => x(d.parsedDate) - x(d.parsedDate - ONE_DAY))
           .attr('height', d => y(d.DailyRecordMin) - y(d.NormalDailyMax))
           .attr('fill', 'rgba(150, 150, 150, 0.4)');
-      const lowOverlay = chart.append('g').selectAll('rect')
+      const lowOverlay = chart.select('.lowOverlay').selectAll('rect')
         .data(weatherRecordsData)
         .join('rect')
           .attr('x', d => x(d.parsedDate))
@@ -164,7 +192,7 @@ export default {
           .attr('fill', 'rgba(174, 199, 232, 0.5)');
 
       // Draw temperature bars
-      const tempBars = chart.append('g').selectAll('rect')
+      const tempBars = chart.select('.tempBars').selectAll('rect')
         .data(weatherData)
         .join('rect')
           .attr('x', d => x(d.parsedDate))
@@ -172,6 +200,17 @@ export default {
           .attr('width', d => x(d.parsedDate) - x(d.parsedDate - ONE_DAY))
           .attr('height', d => y(d.TMIN) - y(d.TMAX))
           .attr('fill', 'rgb(80, 80, 80)');
+    },
+
+    updateCharts() {
+      this.updateChart(this.$refs.winterChart, {
+        tempRange: [-30, 100],
+        timeRange: winterDates,
+      });
+      this.updateChart(this.$refs.summerChart, {
+        tempRange: [0, 110],
+        timeRange: summerDates,
+      });
     },
   },
 };
