@@ -8,12 +8,14 @@
         in Boulder, CO.
       </p>
     </template>
-    <div class="buttonContainer">
-      <button class="button" @click="changeLocation(locations.boulder)">
-        Boulder
-      </button>
-      <button class="button" @click="changeLocation(locations.dc)">
-        DC
+    <div class="btn-group">
+      <button
+        v-for="loc in locations"
+        :key="loc"
+        :class="['btn', 'btn-default', { active: location === loc }]"
+        @click="changeLocation(loc)"
+      >
+        {{ getLocationLabel(loc) }}
       </button>
     </div>
     <svg
@@ -107,6 +109,12 @@ export default {
       this.updateCharts();
     },
 
+    getLocationLabel(location) {
+      if (location === locations.boulder) return 'Boulder, CO';
+      if (location === locations.dc) return 'Washington, DC';
+      return '';
+    },
+
     getWeatherData(dates) {
       return this.weather.filter((d) => {
         d.parsedDate = dateParse(d.DATE);
@@ -132,8 +140,7 @@ export default {
       const weatherData = this.getWeatherData(timeRange);
       const weatherRecordsData = this.getWeatherRecordData(timeRange);
 
-      const chartContainer = d3.selectAll(chartElement);
-      const chart = chartContainer.select('g');
+      const chart = d3.selectAll(chartElement).select('g');
 
       const x = d3.scaleTime()
         .domain(timeRange)
@@ -195,8 +202,6 @@ export default {
           .attr('height', d => y(d.DailyRecordMin) - y(d.NormalDailyMin))
           .attr('fill', 'rgba(174, 199, 232, 0.5)');
 
-      console.log(weatherData);
-
       // Draw temperature bars
       const tempBars = chart.select('.tempBars').selectAll('rect')
         .data(weatherData)
@@ -227,4 +232,6 @@ export default {
 .weatherPost {
   max-width: 900px;
 }
+
+.btn-group { margin-bottom: 20px; }
 </style>
