@@ -32,6 +32,8 @@
         <g class="avgOverlay" />
         <g class="lowOverlay" />
         <g class="tempBars" />
+        <g class="precipYAxis" />
+        <g class="precipBars" />
       </g>
     </svg>
   </Post>
@@ -48,7 +50,7 @@ const width = 750;
 const margin = {
   top: 10,
   right: 30,
-  bottom: 30,
+  bottom: 80,
   left: 30,
 };
 
@@ -212,6 +214,23 @@ export default {
           .attr('width', d => x(d.parsedDate) - x(d.parsedDate - ONE_DAY))
           .attr('height', d => y(d.TMIN) - y(d.TMAX))
           .attr('fill', 'rgb(80, 80, 80)');
+
+      // Precipitation graph (Note that these are being drawn inside the bottom margin)
+      const precipY = d3.scaleLinear()
+        .domain([0, 5])
+        .range([height + 60, height]);
+      const precipYAxis = d3.axisLeft().scale(precipY).ticks(3);
+      chart.select('.precipYAxis').call(precipYAxis);
+
+      const precipBars = chart.select('.precipBars').selectAll('rect')
+        .data(weatherData)
+        .join('rect')
+          .transition()
+          .attr('x', d => x(d.parsedDate))
+          .attr('y', d => precipY(d.PRCP))
+          .attr('width', d => x(d.parsedDate) - x(d.parsedDate - ONE_DAY))
+          .attr('height', d => precipY(0) - precipY(d.PRCP))
+          .attr('fill', 'steelblue');
     },
 
     updateCharts() {
