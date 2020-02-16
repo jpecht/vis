@@ -153,6 +153,7 @@ export default {
       chart.select('.grid').selectAll('line')
         .data(gridLineData)
         .join('line')
+          .transition()
           .attr('x2', width)
           .attr('y1', d => y(d))
           .attr('y2', d => y(d))
@@ -169,6 +170,7 @@ export default {
       const highOverlay = chart.select('.highOverlay').selectAll('rect')
         .data(weatherRecordsData)
         .join('rect')
+          .transition()
           .attr('x', d => x(d.parsedDate))
           .attr('y', d => y(d.DailyRecordMax))
           .attr('width', d => x(d.parsedDate) - x(d.parsedDate - ONE_DAY))
@@ -177,6 +179,7 @@ export default {
       const avgOverlay = chart.select('.avgOverlay').selectAll('rect')
         .data(weatherRecordsData)
         .join('rect')
+          .transition()
           .attr('x', d => x(d.parsedDate))
           .attr('y', d => y(d.NormalDailyMax))
           .attr('width', d => x(d.parsedDate) - x(d.parsedDate - ONE_DAY))
@@ -185,16 +188,20 @@ export default {
       const lowOverlay = chart.select('.lowOverlay').selectAll('rect')
         .data(weatherRecordsData)
         .join('rect')
+          .transition()
           .attr('x', d => x(d.parsedDate))
           .attr('y', d => y(d.NormalDailyMin))
           .attr('width', d => x(d.parsedDate) - x(d.parsedDate - ONE_DAY))
           .attr('height', d => y(d.DailyRecordMin) - y(d.NormalDailyMin))
           .attr('fill', 'rgba(174, 199, 232, 0.5)');
 
+      console.log(weatherData);
+
       // Draw temperature bars
       const tempBars = chart.select('.tempBars').selectAll('rect')
         .data(weatherData)
         .join('rect')
+          .transition()
           .attr('x', d => x(d.parsedDate))
           .attr('y', d => y(d.TMAX))
           .attr('width', d => x(d.parsedDate) - x(d.parsedDate - ONE_DAY))
