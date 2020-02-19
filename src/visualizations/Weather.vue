@@ -32,6 +32,7 @@
         <g class="avgOverlay" />
         <g class="lowOverlay" />
         <g class="tempBars" />
+        <g class="precipXAxis" />
         <g class="precipYAxis" />
         <g class="precipBars" />
       </g>
@@ -45,17 +46,18 @@ import Post from '@/components/Post.vue';
 import visualizations from '@/constants/VisualizationsList';
 
 // chart dimensions
-const height = 300;
 const width = 750;
+const height = 300;
+const precipHeight = 60;
 const margin = {
   top: 10,
   right: 30,
-  bottom: 80,
+  bottom: precipHeight + 20,
   left: 30,
 };
 
 // date constants
-const winterDates = [new Date(2018, 10), new Date(2019, 4)];
+const winterDates = [new Date(2018, 9), new Date(2019, 4)];
 const summerDates = [new Date(2019, 4), new Date(2019, 10)];
 const dateParse = d3.timeParse('%m/%d/%Y');
 const ONE_DAY = 24 * 3600 * 1000;
@@ -218,9 +220,17 @@ export default {
       // Precipitation graph (Note that these are being drawn inside the bottom margin)
       const precipY = d3.scaleLinear()
         .domain([0, 5])
-        .range([height + 60, height]);
+        .range([height + precipHeight, height]);
       const precipYAxis = d3.axisLeft().scale(precipY).ticks(3);
       chart.select('.precipYAxis').call(precipYAxis);
+
+      chart.select('.precipXAxis').selectAll('line')
+        .data([width])
+        .join('line')
+          .attr('x2', width)
+          .attr('y1', height + precipHeight)
+          .attr('y2', height + precipHeight)
+          .style('stroke', '#999');
 
       const precipBars = chart.select('.precipBars').selectAll('rect')
         .data(weatherData)
@@ -247,10 +257,9 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
-.weatherPost {
-  max-width: 900px;
-}
+<style lang="scss">
+@import '~@/styles/legacy/bootstrap-partial.css';
 
 .btn-group { margin-bottom: 20px; }
+.xAxis .tick:nth-child(2) text { display: none; }
 </style>
