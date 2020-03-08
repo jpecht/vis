@@ -45,12 +45,8 @@
         </g>
       </svg>
     </div>
-    <div class="legendContainer">
-      <svg
-        class="legend"
-        height="120"
-        width="150"
-      >
+    <div class="legendContainer tempLegendContainer">
+      <svg height="120" width="150">
         <g transform="translate(55, 10)">
           <rect width="7" y="0" height="30" :fill="colors.recordHigh" />
           <rect width="7" y="30" height="40" :fill="colors.normal" />
@@ -68,6 +64,18 @@
           <line x1="-18" x2="-3" y1="41" y2="41" />
           <line x1="-18" x2="-3" y1="60" y2="60" />
           <line x1="-18" x2="-18" y1="41" y2="60" />          
+        </g>
+      </svg>
+    </div>
+    <div class="legendContainer precipLegendContainer">
+      <svg height="55" width="65">
+        <g transform="translate(5, 5)">
+          <rect width="7" y="0" height="20" :fill="colors.rain" />
+          <rect width="7" y="20" height="30" :fill="colors.snow" />
+          <text x="30" y="15">Precip</text>
+          <line x1="10" x2="25" y1="11" y2="11" />
+          <text x="30" y="40">Snow</text>
+          <line x1="10" x2="25" y1="36" y2="36" />
         </g>
       </svg>
     </div>
@@ -327,7 +335,7 @@ export default {
           .text('Temperature (°F)');
         chart.append('text')
           .attr('class', 'axisLabel')
-          .attr('x', -height - (precipHeight / 2))
+          .attr('x', -height - (precipHeight / 2) - 5)
           .attr('y', -35)
           .attr('transform', 'rotate(-90)')
           .text('Precip (in.)');
@@ -366,12 +374,18 @@ export default {
 .legendContainer {
   background-color: #eee;
   border: 1px solid #999;
-  padding: 5px 10px;
+  padding: 5px 10px;  
   position: absolute;
-  right: 10px;
-  top: -15px;
 
   text { font-size: 10px; }
   line { stroke: #555; }
+}
+.tempLegendContainer {
+  right: 10px;
+  top: -15px;
+}
+.precipLegendContainer {
+  right: 10px;
+  top: 310px;
 }
 </style>
