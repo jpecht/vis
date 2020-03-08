@@ -123,6 +123,7 @@ export default {
 
 .vis {
   font-size: 13px;
+  position: relative;
   text-align: center;
 }
 

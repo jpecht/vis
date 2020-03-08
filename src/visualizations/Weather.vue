@@ -45,6 +45,32 @@
         </g>
       </svg>
     </div>
+    <div class="legendContainer">
+      <svg
+        class="legend"
+        height="120"
+        width="150"
+      >
+        <g transform="translate(55, 10)">
+          <rect width="7" y="0" height="30" :fill="colors.recordHigh" />
+          <rect width="7" y="30" height="40" :fill="colors.normal" />
+          <rect width="7" y="70" height="30" :fill="colors.recordLow" />
+          <rect width="7" y="40" height="20" :fill="colors.actual" />
+          <text x="30" y="5">Record High</text>
+          <line x1="10" x2="25" y1="1" y2="1" />
+          <text x="30" y="35">Normal High</text>
+          <line x1="10" x2="25" y1="31" y2="31" />
+          <text x="30" y="74">Normal Low</text>
+          <line x1="10" x2="25" y1="70" y2="70" />
+          <text x="30" y="104">Record Low</text>
+          <line x1="10" x2="25" y1="100" y2="100" />
+          <text x="-23" y="54" text-anchor="end">Actual</text>
+          <line x1="-18" x2="-3" y1="41" y2="41" />
+          <line x1="-18" x2="-3" y1="60" y2="60" />
+          <line x1="-18" x2="-18" y1="41" y2="60" />          
+        </g>
+      </svg>
+    </div>
   </Post>
 </template>
 
@@ -70,12 +96,21 @@ const summerDates = [new Date(2019, 4), new Date(2019, 9, 15)];
 const dateParse = d3.timeParse('%m/%d/%Y');
 const ONE_DAY = 24 * 3600 * 1000;
 
+// colors
+const colors = {
+  recordHigh: 'rgba(255, 152, 150, 0.5)',
+  normal: 'rgba(150, 150, 150, 0.4)',
+  recordLow: 'rgba(174, 199, 232, 0.5)',
+  actual: 'rgb(80, 80, 80)',
+  rain: '#444c5c',
+  snow: '#8e90a4',
+};
+
 // other constants
 const locations = {
   boulder: 'Boulder',
   dc: 'DC',
 };
-
 const chartTitleByRef = {
   winterChart: 'Winter',
   summerChart: 'Summer',
@@ -97,6 +132,7 @@ export default {
       'summerChart',
     ],
     chartTitleByRef,
+    colors,
     info: visualizations.find(v => v.url === 'weather'),
     location: locations.boulder,
     locations,
@@ -203,7 +239,7 @@ export default {
           .attr('y', d => y(d.DailyRecordMax))
           .attr('width', d => x(d.parsedDate) - x(d.parsedDate - ONE_DAY))
           .attr('height', d => y(d.NormalDailyMax) - y(d.DailyRecordMax))
-          .attr('fill', 'rgba(255, 152, 150, 0.5)');
+          .attr('fill', colors.recordHigh);
       const avgOverlay = chart.select('.avgOverlay').selectAll('rect')
         .data(weatherRecordsData)
         .join('rect')
@@ -212,7 +248,7 @@ export default {
           .attr('y', d => y(d.NormalDailyMax))
           .attr('width', d => x(d.parsedDate) - x(d.parsedDate - ONE_DAY))
           .attr('height', d => y(d.DailyRecordMin) - y(d.NormalDailyMax))
-          .attr('fill', 'rgba(150, 150, 150, 0.4)');
+          .attr('fill', colors.normal);
       const lowOverlay = chart.select('.lowOverlay').selectAll('rect')
         .data(weatherRecordsData)
         .join('rect')
@@ -221,7 +257,7 @@ export default {
           .attr('y', d => y(d.NormalDailyMin))
           .attr('width', d => x(d.parsedDate) - x(d.parsedDate - ONE_DAY))
           .attr('height', d => y(d.DailyRecordMin) - y(d.NormalDailyMin))
-          .attr('fill', 'rgba(174, 199, 232, 0.5)');
+          .attr('fill', colors.recordLow);
 
       // Draw temperature bars
       const tempBars = chart.select('.tempBars').selectAll('rect')
@@ -232,7 +268,7 @@ export default {
           .attr('y', d => y(d.TMAX))
           .attr('width', d => x(d.parsedDate) - x(d.parsedDate - ONE_DAY))
           .attr('height', d => y(d.TMIN) - y(d.TMAX))
-          .attr('fill', 'rgb(80, 80, 80)');
+          .attr('fill', colors.actual);
 
       // Precipitation graph (Note that these are being drawn inside the bottom margin)
       const precipY = d3.scaleLinear()
@@ -255,7 +291,7 @@ export default {
           .attr('y', d => precipY(d.SNOW))
           .attr('width', d => x(d.parsedDate) - x(d.parsedDate - ONE_DAY))
           .attr('height', d => precipY(0) - precipY(d.SNOW))
-          .attr('fill', '#8e90a4');
+          .attr('fill', colors.snow);
 
       const rainBars = chart.select('.precipBars').selectAll('.rainBars')
         .data(weatherData)
@@ -266,7 +302,7 @@ export default {
           .attr('y', d => precipY(+d.PRCP + +d.SNOW))
           .attr('width', d => x(d.parsedDate) - x(d.parsedDate - ONE_DAY))
           .attr('height', d => precipY(d.SNOW) - precipY(+d.PRCP + +d.SNOW))
-          .attr('fill', '#444c5c');
+          .attr('fill', colors.rain);
     },
 
     updateCharts() {
@@ -288,7 +324,13 @@ export default {
           .attr('x', -height / 2)
           .attr('y', -35)
           .attr('transform', 'rotate(-90)')
-          .text('Temperature (in °F)');
+          .text('Temperature (°F)');
+        chart.append('text')
+          .attr('class', 'axisLabel')
+          .attr('x', -height - (precipHeight / 2))
+          .attr('y', -35)
+          .attr('transform', 'rotate(-90)')
+          .text('Precip (in.)');
       });
     },
   },
@@ -298,7 +340,10 @@ export default {
 <style lang="scss">
 @import '~@/styles/legacy/bootstrap-partial.css';
 
-.btn-group { margin-bottom: 20px; }
+.btn-group .btn {
+  font-size: 13px;
+  margin-bottom: 20px;
+}
 
 .chartContainer {
   margin-bottom: 20px;
@@ -316,5 +361,17 @@ export default {
 .axisLabel {
   font-size: 10px;
   text-anchor: middle;
+}
+
+.legendContainer {
+  background-color: #eee;
+  border: 1px solid #999;
+  padding: 5px 10px;
+  position: absolute;
+  right: 10px;
+  top: -15px;
+
+  text { font-size: 10px; }
+  line { stroke: #555; }
 }
 </style>
