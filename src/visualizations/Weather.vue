@@ -18,25 +18,33 @@
         {{ getLocationLabel(loc) }}
       </button>
     </div>
-    <svg
-      v-for="chartRef in chartRefs"
-      :height="chart.height + chart.margin.top + chart.margin.bottom"
-      :width="chart.width + chart.margin.left + chart.margin.right"
-      :ref="chartRef"
+    <div
+      class="chartContainer"
+      v-for="(chartRef, index) in chartRefs"
+      :key="index"
     >
-      <g :transform="`translate(${chart.margin.left}, ${chart.margin.top})`">
-        <g class="grid" />
-        <g class="xAxis" />
-        <g class="yAxis" />
-        <g class="highOverlay" />
-        <g class="avgOverlay" />
-        <g class="lowOverlay" />
-        <g class="tempBars" />
-        <g class="precipXAxis" />
-        <g class="precipYAxis" />
-        <g class="precipBars" />
-      </g>
-    </svg>
+      <h4 class="chartTitle">
+        {{ chartTitleByRef[chartRef] }} in {{ location }}
+      </h4>
+      <svg
+        :height="chart.height + chart.margin.top + chart.margin.bottom"
+        :width="chart.width + chart.margin.left + chart.margin.right"
+        :ref="chartRef"
+      >
+        <g :transform="`translate(${chart.margin.left}, ${chart.margin.top})`">
+          <g class="grid" />
+          <g class="xAxis" />
+          <g class="yAxis" />
+          <g class="highOverlay" />
+          <g class="avgOverlay" />
+          <g class="lowOverlay" />
+          <g class="tempBars" />
+          <g class="precipXAxis" />
+          <g class="precipYAxis" />
+          <g class="precipBars" />
+        </g>
+      </svg>
+    </div>
   </Post>
 </template>
 
@@ -53,7 +61,7 @@ const margin = {
   top: 10,
   right: 30,
   bottom: precipHeight + 20,
-  left: 30,
+  left: 60,
 };
 
 // date constants
@@ -66,6 +74,11 @@ const ONE_DAY = 24 * 3600 * 1000;
 const locations = {
   boulder: 'Boulder',
   dc: 'DC',
+};
+
+const chartTitleByRef = {
+  winterChart: 'Winter',
+  summerChart: 'Summer',
 };
 
 export default {
@@ -83,6 +96,7 @@ export default {
       'winterChart',
       'summerChart',
     ],
+    chartTitleByRef,
     info: visualizations.find(v => v.url === 'weather'),
     location: locations.boulder,
     locations,
@@ -105,6 +119,7 @@ export default {
     ]);
 
     this.updateCharts();
+    this.drawLabels();
   },
 
   methods: {
@@ -154,7 +169,9 @@ export default {
         .range([height, 0]);
 
       const xAxis = d3.axisBottom().scale(x);
-      const yAxis = d3.axisLeft().scale(y);
+      const yAxis = d3.axisLeft()
+        .scale(y)
+        .tickFormat(d => `${d}°`);
 
       // Draw grid lines
       const gridLineData = [];
@@ -254,12 +271,24 @@ export default {
 
     updateCharts() {
       this.updateChart(this.$refs.winterChart, {
-        tempRange: [-30, 100],
+        tempRange: [-30, 110],
         timeRange: winterDates,
       });
       this.updateChart(this.$refs.summerChart, {
-        tempRange: [0, 110],
+        tempRange: [-30, 110],
         timeRange: summerDates,
+      });
+    },
+
+    drawLabels() {
+      this.chartRefs.forEach((chartRef) => {
+        const chart = d3.selectAll(this.$refs[chartRef]).select('g');
+        chart.append('text')
+          .attr('class', 'axisLabel')
+          .attr('x', -height / 2)
+          .attr('y', -35)
+          .attr('transform', 'rotate(-90)')
+          .text('Temperature (in °F)');
       });
     },
   },
@@ -270,5 +299,22 @@ export default {
 @import '~@/styles/legacy/bootstrap-partial.css';
 
 .btn-group { margin-bottom: 20px; }
+
+.chartContainer {
+  margin-bottom: 20px;
+}
+.chartTitle {
+  font-size: 16px;
+  font-weight: 300;
+  margin: 0;
+  padding: 0 60px 10px;
+  text-align: left;
+}
+
 .xAxis .tick:nth-child(2) text { display: none; }
+
+.axisLabel {
+  font-size: 10px;
+  text-anchor: middle;
+}
 </style>
