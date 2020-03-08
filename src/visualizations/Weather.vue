@@ -57,8 +57,8 @@ const margin = {
 };
 
 // date constants
-const winterDates = [new Date(2018, 9), new Date(2019, 4)];
-const summerDates = [new Date(2019, 4), new Date(2019, 10)];
+const winterDates = [new Date(2018, 9, 15), new Date(2019, 4)];
+const summerDates = [new Date(2019, 4), new Date(2019, 9, 15)];
 const dateParse = d3.timeParse('%m/%d/%Y');
 const ONE_DAY = 24 * 3600 * 1000;
 
@@ -122,7 +122,7 @@ export default {
     getWeatherData(dates) {
       return this.weather.filter((d) => {
         d.parsedDate = dateParse(d.DATE);
-        return d.STATION === this.stationId && d.parsedDate > dates[0] && d.parsedDate < dates[1];
+        return d.STATION === this.stationId && d.parsedDate >= dates[0] && d.parsedDate < dates[1];
       });
     },
 
@@ -219,28 +219,37 @@ export default {
 
       // Precipitation graph (Note that these are being drawn inside the bottom margin)
       const precipY = d3.scaleLinear()
-        .domain([0, 5])
+        .domain([0, 14])
         .range([height + precipHeight, height]);
       const precipYAxis = d3.axisLeft().scale(precipY).ticks(3);
+      chart.select('.precipXAxis')
+        .call(xAxis)
+        .attr('transform', `translate(0, ${height + precipHeight})`)
+        .selectAll('.tick')
+          .style('display', 'none');
       chart.select('.precipYAxis').call(precipYAxis);
 
-      chart.select('.precipXAxis').selectAll('line')
-        .data([width])
-        .join('line')
-          .attr('x2', width)
-          .attr('y1', height + precipHeight)
-          .attr('y2', height + precipHeight)
-          .style('stroke', '#999');
-
-      const precipBars = chart.select('.precipBars').selectAll('rect')
+      const snowBars = chart.select('.precipBars').selectAll('.snowBars')
         .data(weatherData)
         .join('rect')
+          .attr('class', 'snowBars')
           .transition()
           .attr('x', d => x(d.parsedDate))
-          .attr('y', d => precipY(d.PRCP))
+          .attr('y', d => precipY(d.SNOW))
           .attr('width', d => x(d.parsedDate) - x(d.parsedDate - ONE_DAY))
-          .attr('height', d => precipY(0) - precipY(d.PRCP))
-          .attr('fill', 'steelblue');
+          .attr('height', d => precipY(0) - precipY(d.SNOW))
+          .attr('fill', '#8e90a4');
+
+      const rainBars = chart.select('.precipBars').selectAll('.rainBars')
+        .data(weatherData)
+        .join('rect')
+          .attr('class', 'rainBars')
+          .transition()
+          .attr('x', d => x(d.parsedDate))
+          .attr('y', d => precipY(+d.PRCP + +d.SNOW))
+          .attr('width', d => x(d.parsedDate) - x(d.parsedDate - ONE_DAY))
+          .attr('height', d => precipY(d.SNOW) - precipY(+d.PRCP + +d.SNOW))
+          .attr('fill', '#444c5c');
     },
 
     updateCharts() {
