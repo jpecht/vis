@@ -108,5 +108,12 @@ export default new Router({
       name: 'weather',
       component: () => import('./visualizations/Weather.vue'),
     },
+    {
+      // Manually redirect absolute URLs (so <router-link> can still be used)
+      path: '//*',
+      beforeEnter: (to) => {
+        window.location.assign(to.fullPath);
+      },
+    }
   ],
 });
