@@ -4,7 +4,7 @@ export default [
     subtitle: 'a look at the weather in 2019',
     date: 'Mar 28, 2020',
     url: 'weather',
-    imageFilename: 'fb_force_ss.png',
+    imageFilename: 'weather_ss.png',
   },
   {
     title: 'Songs over Time by BPM',

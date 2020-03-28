@@ -3,4 +3,5 @@ module.exports = {
     devtool: 'source-map',
   },
   lintOnSave: false,
+  publicPath: '/vis/',
 };
