@@ -2,7 +2,7 @@ export default [
   {
     title: 'Weather in Boulder',
     subtitle: 'a look at the weather in 2019',
-    date: 'Feb 20, 2020',
+    date: 'Mar 28, 2020',
     url: 'weather',
     imageFilename: 'fb_force_ss.png',
   },

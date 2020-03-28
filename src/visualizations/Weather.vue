@@ -2,10 +2,10 @@
   <Post :wide="true" v-bind="info">
     <template v-slot:description>
       <p>
-        I was inspired by a chart I saw in **DATA_VIS_BOOK** that the New York Times published
-        in 2010. It was interesting to me how much data was able to presented in one chart
-        without being overwhelming. I decided to try to make my own version of it using weather
-        in Boulder, CO.
+        I was inspired by a weather chart I saw that the New York Times published
+        in 2010. It was interesting to me how much data was able to be presented in one chart
+        without being overwhelming. I decided to try to make my own dynamic version using weather
+        data from the two places I've lived: Boulder, CO and Washington, DC.
       </p>
     </template>
     <div class="btn-group">
@@ -79,6 +79,9 @@
         </g>
       </svg>
     </div>
+    <div class="source">
+      Source: National Weather Service
+    </div>
   </Post>
 </template>
 
@@ -106,7 +109,7 @@ const ONE_DAY = 24 * 3600 * 1000;
 
 // colors
 const colors = {
-  recordHigh: 'rgba(255, 152, 150, 0.5)',
+  recordHigh: 'rgba(199, 122, 114, 0.4)',
   normal: 'rgba(150, 150, 150, 0.4)',
   recordLow: 'rgba(174, 199, 232, 0.5)',
   actual: 'rgb(80, 80, 80)',
@@ -190,7 +193,7 @@ export default {
         let inTimeRange = false;
         [2018, 2019].forEach((year) => {
           const date = new Date(year, d.Month - 1, d.Day);
-          if (date > dates[0] && date < dates[1]) {
+          if (date >= dates[0] && date < dates[1]) {
             inTimeRange = true;
             d.parsedDate = date;
           }
@@ -350,7 +353,7 @@ export default {
 
 .btn-group .btn {
   font-size: 13px;
-  margin-bottom: 20px;
+  margin: 10px 0 20px;
 }
 
 .chartContainer {
@@ -382,10 +385,15 @@ export default {
 }
 .tempLegendContainer {
   right: 10px;
-  top: -15px;
+  top: -5px;
 }
 .precipLegendContainer {
   right: 10px;
-  top: 310px;
+  top: 320px;
+}
+
+.source {
+  font-size: 11px;
+  text-align: right;
 }
 </style>

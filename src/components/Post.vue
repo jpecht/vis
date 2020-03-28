@@ -117,6 +117,7 @@ export default {
   font-size: 13px;
   font-weight: 400;
   margin: 0;
+  max-width: 700px;
   padding: 20px 0;
   text-align: left;
 }
