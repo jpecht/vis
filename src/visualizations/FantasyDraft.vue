@@ -98,7 +98,7 @@ export default {
           
       var position_array = [];    
       
-      let data = await d3.tsv('/data/ff_draft.tsv');
+      let data = await d3.tsv('./data/ff_draft.tsv');
       if (data.length > max_players) data = data.slice(0, max_players);
       
       var player = chart.selectAll('.player')

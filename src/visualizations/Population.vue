@@ -121,8 +121,8 @@ export default {
         
       
       const [us, pop_data] = await Promise.all([
-        d3.json('/data/us.json'),
-        d3.tsv('/data/hist_county_pop.tsv'),
+        d3.json('./data/us.json'),
+        d3.tsv('./data/hist_county_pop.tsv'),
       ]);
 
       // drawing the map

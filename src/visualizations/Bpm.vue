@@ -101,8 +101,8 @@ export default {
 
 
       const [oldData, data] = await Promise.all([
-        d3.tsv('/data/bpm_frequency.tsv'),
-        d3.tsv('/data/bpm_frequency_091416.tsv'),
+        d3.tsv('./data/bpm_frequency.tsv'),
+        d3.tsv('./data/bpm_frequency_091416.tsv'),
       ]);
 
       // collate diff data

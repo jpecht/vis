@@ -161,8 +161,8 @@ export default {
 
   async mounted() {
     [this.weather, this.weatherRecords] = await Promise.all([
-      d3.csv('/data/weather.csv'),
-      d3.tsv('/data/weather_records.tsv'),
+      d3.csv('./data/weather.csv'),
+      d3.tsv('./data/weather_records.tsv'),
     ]);
 
     this.updateCharts();

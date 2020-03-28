@@ -70,7 +70,7 @@ export default {
         .domain([87.5, 175])
         .range([height, 0]);
 
-      const rawData = await d3.tsv('/data/music_collection_070917.tsv');
+      const rawData = await d3.tsv('./data/music_collection_070917.tsv');
 
       // filter out songs without bpm
       let data = rawData.filter(d => !Number.isNaN(d.BPM));

@@ -58,7 +58,7 @@ export default {
         .attr('width', chart_width)
         .attr('height', chart_height);
       
-      const unf_data = await d3.tsv('/data/cali_drought.tsv');
+      const unf_data = await d3.tsv('./data/cali_drought.tsv');
 
       // initialize datasets
       var data_coll = {labels: [], datasets: []};

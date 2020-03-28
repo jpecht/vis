@@ -49,7 +49,7 @@ export default {
         .domain([-10, -5, -2, 2, 5, 10])
         .range(['rgb(214,96,77)','rgb(244,165,130)','rgb(253,219,199)','rgb(247,247,247)','rgb(209,229,240)','rgb(146,197,222)','rgb(67,147,195)']);
         
-      const data = await d3.tsv('/data/ff_draft_league.tsv');
+      const data = await d3.tsv('./data/ff_draft_league.tsv');
         
       var diff_array = [];
       for (var i = 0; i < data.length; i++) diff_array.push(+data[i].diff);

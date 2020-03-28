@@ -52,7 +52,7 @@ export default {
         return [x_trans, y_trans];
       };
 
-      const data = await d3.tsv('/data/dc_snowfall.tsv');
+      const data = await d3.tsv('./data/dc_snowfall.tsv');
       var default_data = data[data.length - 1]
       var default_time = '<span class="snowfall-time">' + default_data.year + ' Snowfall</span>';
       var default_val = '<span class="snowfall-val">' + default_data.season + '"</span>';

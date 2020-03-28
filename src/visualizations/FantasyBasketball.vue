@@ -73,7 +73,7 @@ export default {
       var dec2format = d3.format('.2f');
       
       // grab data and draw!
-      let data = await d3.tsv('/data/bball_ranks.tsv');
+      let data = await d3.tsv('./data/bball_ranks.tsv');
       data = data.slice(0, 100);
           
       var rows = table.selectAll('tr:not(.header-row)')

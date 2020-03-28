@@ -148,8 +148,8 @@ export default {
       
       var dataById = {};
       const [us, data] = await Promise.all([
-        d3.json('/data/us.json'),
-        d3.tsv('/data/education_county.tsv'),
+        d3.json('./data/us.json'),
+        d3.tsv('./data/education_county.tsv'),
       ]);
 
       data.forEach((d) => {

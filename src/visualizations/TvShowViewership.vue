@@ -92,7 +92,7 @@ export default {
         .y(function(d) { return y(+d.viewers); });
 
 
-      const data = await d3.tsv('/data/tv_shows.tsv');
+      const data = await d3.tsv('./data/tv_shows.tsv');
 
       // define axes
       var x_axis_g = svg.append('g')

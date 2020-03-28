@@ -59,7 +59,7 @@ export default {
         .attr('width', chart_width)
         .attr('height', chart_height);
       
-      const unf_data = await d3.tsv('/data/income_threshold.tsv');
+      const unf_data = await d3.tsv('./data/income_threshold.tsv');
       var data_coll = {labels: [], datasets: []};
       
       // initialize datasets

@@ -194,8 +194,8 @@ export default {
       };
 
       const [dc, data] = await Promise.all([
-        d3.json('/data/dc.json'),
-        d3.tsv('/data/dc_indicators.tsv'),
+        d3.json('./data/dc.json'),
+        d3.tsv('./data/dc_indicators.tsv'),
       ]);
       ready(null, dc, data);
     },

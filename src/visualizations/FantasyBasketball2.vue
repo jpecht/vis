@@ -79,7 +79,7 @@ export default {
       const dec2format = d3.format('.2f');
       
       // grab data and draw!
-      let data = await d3.tsv('/data/bball_ranks_2016.tsv');
+      let data = await d3.tsv('./data/bball_ranks_2016.tsv');
       data.sort(function(a, b) { return b.Score_Q - a.Score_Q; });
       data = data
         .filter(function(d) { return d.Player; })

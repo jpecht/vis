@@ -153,9 +153,9 @@ export default {
         .attr('height', map_height);
         
       const [us, pov_data, pa_data] = await Promise.all([
-        d3.json('/data/us.json'),
-        d3.tsv('/data/poverty.tsv'),
-        d3.tsv('/data/poverty_average.tsv'),
+        d3.json('./data/us.json'),
+        d3.tsv('./data/poverty.tsv'),
+        d3.tsv('./data/poverty_average.tsv'),
       ]);
       
       // drawing the map

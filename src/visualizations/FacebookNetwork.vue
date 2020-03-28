@@ -108,8 +108,8 @@ export default {
   methods: {
     async retrieveData() {
       let [nodesData, linksData] = await Promise.all([
-        d3.tsv('/data/fb_friends.tsv'),
-        d3.tsv('/data/fb_mutual_friends.tsv'),
+        d3.tsv('./data/fb_friends.tsv'),
+        d3.tsv('./data/fb_mutual_friends.tsv'),
       ]);
 
       nodesData.shift(); // cut out myself

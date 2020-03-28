@@ -63,7 +63,7 @@ export default {
         .domain([-50, -25, -5, 5, 25, 50])
         .range(['rgb(214,96,77)','rgb(244,165,130)','rgb(253,219,199)','rgb(247,247,247)','rgb(209,229,240)','rgb(146,197,222)','rgb(67,147,195)']);      
       
-      const data = await d3.tsv('/data/ff_performance.tsv');
+      const data = await d3.tsv('./data/ff_performance.tsv');
         
       var diff_array = [];
       for (var i = 0; i < data.length; i++) {
