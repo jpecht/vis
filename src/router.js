@@ -34,6 +34,10 @@ export default new Router({
       component: () => import('./visualizations/FantasyBasketball2.vue'),
     },
     {
+      path: '/covid',
+      component: () => import('./visualizations/Covid.vue'),
+    },
+    {
       path: '/dc-demographics',
       component: () => import('./visualizations/DcDemographics.vue'),
     },

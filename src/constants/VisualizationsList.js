@@ -1,5 +1,12 @@
 export default [
   {
+    title: 'COVID-19 in US',
+    subtitle: 'a look at the growth of COVID-19 cases',
+    date: 'Apr 1, 2020',
+    url: 'covid',
+    imageFilename: 'weather_ss.png',
+  },
+  {
     title: 'Weather in Boulder',
     subtitle: 'a look at the weather in 2019',
     date: 'Mar 28, 2020',
