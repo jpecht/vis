@@ -6,8 +6,10 @@
         It's placed vertically based on its BPM (tempo).
       </p>
     </template>
-    <div class="chart-container">
-      <svg ref="chart"></svg>
+    <div class="bpm-chart-content">
+      <div class="chart-container">
+        <svg ref="chart"></svg>
+      </div>
     </div>
     <template v-slot:post-description>
       <p>
@@ -156,13 +158,15 @@ export default {
 </script>
 
 <style>
-.chart-container { text-align: center; }
-.tick text {
-  font-size: 0.95em;
-}
+.bpm-chart-content {
+  .chart-container { text-align: center; }
+  .tick text {
+    font-size: 0.95em;
+  }
 
-.axis-label {
-  text-anchor: middle;
-  font-size: 0.8em;
+  .axis-label {
+    text-anchor: middle;
+    font-size: 0.8em;
+  }
 }
 </style>

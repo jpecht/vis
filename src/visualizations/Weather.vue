@@ -8,79 +8,81 @@
         data from the two places I've lived: Boulder, CO and Washington, DC.
       </p>
     </template>
-    <div class="btn-group">
-      <button
-        v-for="loc in locations"
-        :key="loc"
-        :class="['btn', 'btn-default', { active: location === loc }]"
-        @click="changeLocation(loc)"
+    <div class="weatherChartContent">
+      <div class="btn-group">
+        <button
+          v-for="loc in locations"
+          :key="loc"
+          :class="['btn', 'btn-default', { active: location === loc }]"
+          @click="changeLocation(loc)"
+        >
+          {{ getLocationLabel(loc) }}
+        </button>
+      </div>
+      <div
+        class="chartContainer"
+        v-for="(chartRef, index) in chartRefs"
+        :key="index"
       >
-        {{ getLocationLabel(loc) }}
-      </button>
-    </div>
-    <div
-      class="chartContainer"
-      v-for="(chartRef, index) in chartRefs"
-      :key="index"
-    >
-      <h4 class="chartTitle">
-        {{ chartTitleByRef[chartRef] }} in {{ location }}
-      </h4>
-      <svg
-        :height="chart.height + chart.margin.top + chart.margin.bottom"
-        :width="chart.width + chart.margin.left + chart.margin.right"
-        :ref="chartRef"
-      >
-        <g :transform="`translate(${chart.margin.left}, ${chart.margin.top})`">
-          <g class="grid" />
-          <g class="xAxis" />
-          <g class="yAxis" />
-          <g class="highOverlay" />
-          <g class="avgOverlay" />
-          <g class="lowOverlay" />
-          <g class="tempBars" />
-          <g class="precipXAxis" />
-          <g class="precipYAxis" />
-          <g class="precipBars" />
-        </g>
-      </svg>
-    </div>
-    <div class="legendContainer tempLegendContainer">
-      <svg height="120" width="150">
-        <g transform="translate(55, 10)">
-          <rect width="7" y="0" height="30" :fill="colors.recordHigh" />
-          <rect width="7" y="30" height="40" :fill="colors.normal" />
-          <rect width="7" y="70" height="30" :fill="colors.recordLow" />
-          <rect width="7" y="40" height="20" :fill="colors.actual" />
-          <text x="30" y="5">Record High</text>
-          <line x1="10" x2="25" y1="1" y2="1" />
-          <text x="30" y="35">Normal High</text>
-          <line x1="10" x2="25" y1="31" y2="31" />
-          <text x="30" y="74">Normal Low</text>
-          <line x1="10" x2="25" y1="70" y2="70" />
-          <text x="30" y="104">Record Low</text>
-          <line x1="10" x2="25" y1="100" y2="100" />
-          <text x="-23" y="54" text-anchor="end">Actual</text>
-          <line x1="-18" x2="-3" y1="41" y2="41" />
-          <line x1="-18" x2="-3" y1="60" y2="60" />
-          <line x1="-18" x2="-18" y1="41" y2="60" />          
-        </g>
-      </svg>
-    </div>
-    <div class="legendContainer precipLegendContainer">
-      <svg height="55" width="65">
-        <g transform="translate(5, 5)">
-          <rect width="7" y="0" height="20" :fill="colors.rain" />
-          <rect width="7" y="20" height="30" :fill="colors.snow" />
-          <text x="30" y="15">Precip</text>
-          <line x1="10" x2="25" y1="11" y2="11" />
-          <text x="30" y="40">Snow</text>
-          <line x1="10" x2="25" y1="36" y2="36" />
-        </g>
-      </svg>
-    </div>
-    <div class="source">
-      Source: National Weather Service
+        <h4 class="chartTitle">
+          {{ chartTitleByRef[chartRef] }} in {{ location }}
+        </h4>
+        <svg
+          :height="chart.height + chart.margin.top + chart.margin.bottom"
+          :width="chart.width + chart.margin.left + chart.margin.right"
+          :ref="chartRef"
+        >
+          <g :transform="`translate(${chart.margin.left}, ${chart.margin.top})`">
+            <g class="grid" />
+            <g class="xAxis" />
+            <g class="yAxis" />
+            <g class="highOverlay" />
+            <g class="avgOverlay" />
+            <g class="lowOverlay" />
+            <g class="tempBars" />
+            <g class="precipXAxis" />
+            <g class="precipYAxis" />
+            <g class="precipBars" />
+          </g>
+        </svg>
+      </div>
+      <div class="legendContainer tempLegendContainer">
+        <svg height="120" width="150">
+          <g transform="translate(55, 10)">
+            <rect width="7" y="0" height="30" :fill="colors.recordHigh" />
+            <rect width="7" y="30" height="40" :fill="colors.normal" />
+            <rect width="7" y="70" height="30" :fill="colors.recordLow" />
+            <rect width="7" y="40" height="20" :fill="colors.actual" />
+            <text x="30" y="5">Record High</text>
+            <line x1="10" x2="25" y1="1" y2="1" />
+            <text x="30" y="35">Normal High</text>
+            <line x1="10" x2="25" y1="31" y2="31" />
+            <text x="30" y="74">Normal Low</text>
+            <line x1="10" x2="25" y1="70" y2="70" />
+            <text x="30" y="104">Record Low</text>
+            <line x1="10" x2="25" y1="100" y2="100" />
+            <text x="-23" y="54" text-anchor="end">Actual</text>
+            <line x1="-18" x2="-3" y1="41" y2="41" />
+            <line x1="-18" x2="-3" y1="60" y2="60" />
+            <line x1="-18" x2="-18" y1="41" y2="60" />          
+          </g>
+        </svg>
+      </div>
+      <div class="legendContainer precipLegendContainer">
+        <svg height="55" width="65">
+          <g transform="translate(5, 5)">
+            <rect width="7" y="0" height="20" :fill="colors.rain" />
+            <rect width="7" y="20" height="30" :fill="colors.snow" />
+            <text x="30" y="15">Precip</text>
+            <line x1="10" x2="25" y1="11" y2="11" />
+            <text x="30" y="40">Snow</text>
+            <line x1="10" x2="25" y1="36" y2="36" />
+          </g>
+        </svg>
+      </div>
+      <div class="source">
+        Source: National Weather Service
+      </div>
     </div>
   </Post>
 </template>
@@ -351,49 +353,51 @@ export default {
 <style lang="scss">
 @import '~@/styles/legacy/bootstrap-partial.css';
 
-.btn-group .btn {
-  font-size: 13px;
-  margin: 10px 0 20px;
-}
+.weatherChartContent {
+  .btn-group .btn {
+    font-size: 13px;
+    margin: 10px 0 20px;
+  }
 
-.chartContainer {
-  margin-bottom: 20px;
-}
-.chartTitle {
-  font-size: 16px;
-  font-weight: 300;
-  margin: 0;
-  padding: 0 60px 10px;
-  text-align: left;
-}
+  .chartContainer {
+    margin-bottom: 20px;
+  }
+  .chartTitle {
+    font-size: 16px;
+    font-weight: 300;
+    margin: 0;
+    padding: 0 60px 10px;
+    text-align: left;
+  }
 
-.xAxis .tick:nth-child(2) text { display: none; }
+  .xAxis .tick:nth-child(2) text { display: none; }
 
-.axisLabel {
-  font-size: 10px;
-  text-anchor: middle;
-}
+  .axisLabel {
+    font-size: 10px;
+    text-anchor: middle;
+  }
 
-.legendContainer {
-  background-color: #eee;
-  border: 1px solid #999;
-  padding: 5px 10px;  
-  position: absolute;
+  .legendContainer {
+    background-color: #eee;
+    border: 1px solid #999;
+    padding: 5px 10px;  
+    position: absolute;
 
-  text { font-size: 10px; }
-  line { stroke: #555; }
-}
-.tempLegendContainer {
-  right: 10px;
-  top: -5px;
-}
-.precipLegendContainer {
-  right: 10px;
-  top: 320px;
-}
+    text { font-size: 10px; }
+    line { stroke: #555; }
+  }
+  .tempLegendContainer {
+    right: 10px;
+    top: -5px;
+  }
+  .precipLegendContainer {
+    right: 10px;
+    top: 320px;
+  }
 
-.source {
-  font-size: 11px;
-  text-align: right;
+  .source {
+    font-size: 11px;
+    text-align: right;
+  }
 }
 </style>
