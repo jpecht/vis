@@ -102,7 +102,7 @@ const metrics = [
   }, {
     name: 'COVID-19 Deaths',
     calculator: d => +d.deaths,
-    colorScheme: d3.schemeBlues[7],
+    colorScheme: d3.schemeReds[7],
     scale: 'threshold',
     thresholds: [1, 2, 5, 10, 100, 1000],
   },
