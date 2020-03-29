@@ -17,13 +17,22 @@
             v-model="currentDaysSinceStart"
             @change="handleDateChange"
           />
-        </div>
-        <div class="dateDisplay">
-          <b>Date:</b> {{ currentDate }}
+          <svg
+            ref="sliderDisplay"
+            class="sliderDisplay"
+          />
         </div>
       </div>
       <div class="source">
         Source:
+        <a
+          href="https://github.com/nytimes/covid-19-data"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          New York Times
+        </a>
+        and
         <a
           href="https://www.census.gov/data/developers/data-sets/popest-popproj/popest.html"
           rel="noopener noreferrer"
@@ -46,9 +55,9 @@ import visualizations from '@/constants/VisualizationsList';
 const mapWidth = 600;
 const mapHeight = 450;
 
+moment.utc();
 const startDate = moment([2020, 2]);
-const endDate = moment().subtract(2, 'days');
-const numDaysSinceStart = endDate.diff(startDate, 'days');
+let endDate = moment([2020, 3]); // temporary until we determine latest data date
 
 export default {
   name: 'Covid',
@@ -59,10 +68,9 @@ export default {
   data: () => ({
     colorScale: d3.scaleQuantile(),
     covidData: [],
-    currentDate: '',
-    currentDaysSinceStart: numDaysSinceStart,
+    currentDaysSinceStart: 30, // temporary until we determine latest data date
     info: visualizations.find(v => v.url === 'covid'),
-    numDaysSinceStart,
+    numDaysSinceStart: 30, // temporary until we determine latest data date
     popDataByFips: {},
   }),
 
@@ -72,6 +80,12 @@ export default {
       d3.csv('https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv'),
       d3.tsv('./data/population_2019.tsv'),
     ]);
+
+    // Determine the last date that there is data for
+    // Assume that the last row of data is the latest
+    endDate = moment(covidData[covidData.length - 1].date);
+    this.numDaysSinceStart = endDate.diff(startDate, 'days');
+    this.currentDaysSinceStart = this.numDaysSinceStart;
 
     // Create the map
     this.createMap(us);
@@ -84,8 +98,8 @@ export default {
       this.popDataByFips[+d.fips] = +d.population;
     });
 
-    // Establish scale based on data from current date
     this.establishScale();
+    this.drawSliderDisplay();
 
     // Draw the map for the current date
     this.handleDateChange();
@@ -128,6 +142,40 @@ export default {
         });
     },
 
+    drawSliderDisplay() {
+      const timeScale = d3.scaleTime()
+        .domain([startDate.toDate(), endDate.toDate()])
+        .range([0, 300]); // range is the width of the slider
+
+      const isMajorTick = (d) => {
+        const date = d.getDate();
+        if (d.getMonth() === endDate.month() && date === endDate.date()) {
+          if (endDate.date() > 10) return true;
+        }
+        return d.getDate() === 1;
+      };
+      const timeAxis = d3.axisBottom()
+        .scale(timeScale)
+        .ticks(d3.timeDay.every(1))
+        // .ticks(d3.timeDay.filter(ticksToShowFunc))
+        .tickFormat(d => isMajorTick(d) ? d3.timeFormat('%b %e')(d) : '')
+        .tickSizeInner(10)
+        .tickSizeOuter(0);
+
+      const sliderDisplay = d3.select(this.$refs.sliderDisplay);
+      sliderDisplay.attr('transform', 'translate(-40, 0)')
+        .append('g')
+          .attr('transform', 'translate(40, 0)')
+          .call(timeAxis);
+
+
+      // Shorten tick size for minor ticks
+      sliderDisplay.selectAll('.tick')
+        .filter(d => !isMajorTick(d))
+        .select('line')
+          .attr('y2', 4);
+    },
+
     establishScale() {
       const dataForDate = this.getDataForDate(endDate.format('YYYY-MM-DD'));
       this.colorScale
@@ -156,7 +204,6 @@ export default {
       const currentDate = moment(startDate).add(this.currentDaysSinceStart, 'days');
       const dateString = currentDate.format('YYYY-MM-DD');
       this.drawForDate(dateString);
-      this.currentDate = currentDate.format('MM/DD/YYYY');
     },
   },
 };
@@ -173,12 +220,29 @@ export default {
   stroke-linejoin: round;
 }
 
-.datePickerContainer { text-align: center; }
+.datePickerContainer {
+  height: 60px;
+  text-align: center;
+}
 .dateDisplay { margin-top: 5px; }
 
 .slider {
   display: inline-block;
+  position: relative;
   width: 300px;
+
+  .vue-slider-rail { background-color: transparent !important; }
+  .vue-slider-process { display: none; }
+}
+
+.sliderDisplay {
+  height: 30px;
+  left: 0;
+  position: absolute;
+  top: 10px;
+  width: 380px;
+
+  .tick text { font-size: 11px; }
 }
 
 .source {
