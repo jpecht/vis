@@ -2,11 +2,28 @@
   <Post v-bind="info">
     <template v-slot:description>
       <p>
-        The New York Times released their COVID-19 county-level data recently.
+        With COVID-19 starting to hit the U.S. pretty hard, I wanted to visualize the data on a map
+        to see how bad it was really getting (and in which parts of the U.S.).
+        The data is directly linked to the New York Times COVID-19 dataset, so this chart automatically
+        updates as NYT updates their dataset.
       </p>
     </template>
-    <div>
+    <div class="covidGraphicContainer">
       <svg ref="map" />
+      <div>
+        <div class="btn-group">
+          <button
+            v-for="metric in metrics"
+            :key="metric.name"
+            :class="['btn', 'btn-default', {
+              active: currentMetric === metric.name,
+            }]"
+            @click="handleMetricChange(metric)"
+          >
+            {{ metric.name }}
+          </button>
+        </div>
+      </div>
       <div class="datePickerContainer">
         <div class="slider">
           <vue-slider
@@ -53,11 +70,36 @@ import moment from 'moment';
 import visualizations from '@/constants/VisualizationsList';
 
 const mapWidth = 600;
-const mapHeight = 450;
+const mapHeight = 420;
 
 moment.utc();
 const startDate = moment([2020, 2]);
 let endDate = moment([2020, 3]); // temporary until we determine latest data date
+
+const metrics = [
+  {
+    name: '# of Cases',
+    calculator: d => +d.cases,
+    colorScheme: d3.schemeBlues[7],
+    scale: 'quantile',
+  }, {
+    name: '% of Cases by Population',
+    calculator: (d, pop) => +d.cases / pop,
+    colorScheme: d3.schemeBlues[7],
+    scale: 'quantile',
+  }, {
+    name: '# of Deaths',
+    calculator: d => +d.deaths,
+    colorScheme: d3.schemeBlues[7],
+    scale: 'threshold',
+    thresholds: [1, 5, 10, 100, 1000, 10000],
+  }, {
+    name: '% of Deaths by Population',
+    calculator: (d, pop) => +d.deaths / pop,
+    colorScheme: d3.schemeBlues[7],
+    scale: 'quantile',
+  },
+];
 
 export default {
   name: 'Covid',
@@ -68,8 +110,11 @@ export default {
   data: () => ({
     colorScale: d3.scaleQuantile(),
     covidData: [],
+    currentDate: endDate.format('YYYY-MM-DD'), // temporary until we determine latest data date
     currentDaysSinceStart: 30, // temporary until we determine latest data date
+    currentMetric: metrics[0].name,
     info: visualizations.find(v => v.url === 'covid'),
+    metrics,
     numDaysSinceStart: 30, // temporary until we determine latest data date
     popDataByFips: {},
   }),
@@ -81,15 +126,6 @@ export default {
       d3.tsv('./data/population_2019.tsv'),
     ]);
 
-    // Determine the last date that there is data for
-    // Assume that the last row of data is the latest
-    endDate = moment(covidData[covidData.length - 1].date);
-    this.numDaysSinceStart = endDate.diff(startDate, 'days');
-    this.currentDaysSinceStart = this.numDaysSinceStart;
-
-    // Create the map
-    this.createMap(us);
-
     // Save COVID data
     this.covidData = covidData;
 
@@ -98,11 +134,20 @@ export default {
       this.popDataByFips[+d.fips] = +d.population;
     });
 
-    this.establishScale();
+    // Determine the last date that there is data for
+    // Assume that the last row of data is the latest
+    endDate = moment(covidData[covidData.length - 1].date);
+    this.currentDate = endDate.format('YYYY-MM-DD');
+    this.numDaysSinceStart = endDate.diff(startDate, 'days');
+    this.currentDaysSinceStart = this.numDaysSinceStart;
+
+    // Create components
+    this.createMap(us);
     this.drawSliderDisplay();
 
-    // Draw the map for the current date
-    this.handleDateChange();
+    // Update the scale and map
+    this.establishScale();
+    this.updateMap();
   },
 
   methods: {
@@ -131,15 +176,6 @@ export default {
     },
 
     drawForDate(date) {
-      // Filter the NYT data for the single date
-      const covidDataForDate = this.getDataForDate(date);
-
-      // Color counties based on color scale
-      d3.selectAll('.county')
-        .style('fill', (d) => {
-          const numCases = covidDataForDate[d.id] || 0;
-          return this.colorScale(numCases);
-        });
     },
 
     drawSliderDisplay() {
@@ -159,7 +195,7 @@ export default {
         .ticks(d3.timeDay.every(1))
         // .ticks(d3.timeDay.filter(ticksToShowFunc))
         .tickFormat(d => isMajorTick(d) ? d3.timeFormat('%b %e')(d) : '')
-        .tickSizeInner(10)
+        .tickSizeInner(8)
         .tickSizeOuter(0);
 
       const sliderDisplay = d3.select(this.$refs.sliderDisplay);
@@ -177,76 +213,108 @@ export default {
     },
 
     establishScale() {
-      const dataForDate = this.getDataForDate(endDate.format('YYYY-MM-DD'));
-      this.colorScale
-        .domain(Object.values(dataForDate))
-        .range(d3.schemeBlues[7]);
+      const metric = metrics.find(m => m.name === this.currentMetric);
+      const dataByFips = this.getDataByFips();
+      if (metric.scale === 'quantile') {
+        this.colorScale = d3.scaleQuantile()
+          .domain(Object.values(dataByFips))
+          .range(metric.colorScheme);
+      } else if (metric.scale === 'threshold') {
+        this.colorScale = d3.scaleThreshold()
+          .domain(metric.thresholds)
+          .range(metric.colorScheme);
+      }
     },
 
-    getDataForDate(date) {
+    getDataByFips(date) {
+      const metric = metrics.find(m => m.name === this.currentMetric);
+
       // Filter the NYT data for the single date
-      const covidDataForDate = this.covidData.filter(d => d.date === date);
+      const covidDataForDate = this.covidData.filter(d => d.date === this.currentDate);
 
       // Create lookup by FIPS and calculate percentage of cases per population
-      const percentageCasesByFips = {};
+      const dataByFips = {};
       covidDataForDate.forEach((d) => {
         const fips = +d.fips;
-        const numCases = +d.cases || 0;
         const population = this.popDataByFips[fips];
-        const percentageCases = population ? (numCases / population) : 0;
-        percentageCasesByFips[fips] = percentageCases;
+        if (!population) return 0;
+
+        dataByFips[fips] = metric.calculator(d, population);
       });
 
-      return percentageCasesByFips;
+      return dataByFips;
     },
 
     handleDateChange() {
       const currentDate = moment(startDate).add(this.currentDaysSinceStart, 'days');
-      const dateString = currentDate.format('YYYY-MM-DD');
-      this.drawForDate(dateString);
+      this.currentDate = currentDate.format('YYYY-MM-DD');
+      this.updateMap();
+    },
+
+    handleMetricChange(metric) {
+      this.currentMetric = metric.name;
+      this.establishScale();
+      this.updateMap();
+    },
+
+    updateMap() {
+      // Filter the NYT data for the single date
+      const dataByFips = this.getDataByFips();
+
+      // Color counties based on color scale
+      d3.selectAll('.county')
+        .style('fill', d => this.colorScale(dataByFips[d.id] || 0));
     },
   },
 };
 </script>
 
 <style lang="scss">
-.counties {
-  fill: none;
-}
+@import '~@/styles/legacy/bootstrap-partial.css';
 
-.states {
-  fill: none;
-  stroke: white;
-  stroke-linejoin: round;
-}
+.covidGraphicContainer {
+  .btn {
+    background-color: #f6f6f6;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+    padding: 3px 12px;
+  }
 
-.datePickerContainer {
-  height: 60px;
-  text-align: center;
-}
-.dateDisplay { margin-top: 5px; }
+  .counties { fill: none; }
+  .states {
+    fill: none;
+    stroke: white;
+    stroke-linejoin: round;
+  }
 
-.slider {
-  display: inline-block;
-  position: relative;
-  width: 300px;
+  .datePickerContainer {
+    height: 45px;
+    margin: 15px 0;
+    text-align: center;
+  }
+  .dateDisplay { margin-top: 5px; }
 
-  .vue-slider-rail { background-color: transparent !important; }
-  .vue-slider-process { display: none; }
-}
+  .slider {
+    display: inline-block;
+    position: relative;
+    width: 300px;
 
-.sliderDisplay {
-  height: 30px;
-  left: 0;
-  position: absolute;
-  top: 10px;
-  width: 380px;
+    .vue-slider-rail { background-color: transparent !important; }
+    .vue-slider-process { display: none; }
+  }
 
-  .tick text { font-size: 11px; }
-}
+  .sliderDisplay {
+    left: 0;
+    position: absolute;
+    top: 10px;
+    width: 380px;
 
-.source {
-  font-size: 11px;
-  text-align: right;
+    .tick text { font-size: 11px; }
+  }
+
+  .source {
+    font-size: 11px;
+    text-align: right;
+  }
 }
 </style>
