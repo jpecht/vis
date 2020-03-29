@@ -1,5 +1,5 @@
 <template>
-  <Post v-bind="info">
+  <Post v-bind="info" wide>
     <template v-slot:description>
       <p>
         With COVID-19 starting to hit the U.S. pretty hard, I wanted to visualize the data on a map
@@ -9,8 +9,19 @@
       </p>
     </template>
     <div class="covidGraphicContainer">
-      <svg ref="map" />
       <div>
+        <div class="mapContainer">
+          <svg ref="map" class="map" />
+          <div class="legendContainer">
+            <svg ref="legend" class="legend" />
+            <div class="controls">
+              <input type="checkbox" v-model="showMetricAsPercentage">
+              <span>View as percentage of population</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="metricButtonContainer">
         <div class="btn-group">
           <button
             v-for="metric in metrics"
@@ -73,31 +84,21 @@ const mapWidth = 600;
 const mapHeight = 420;
 
 moment.utc();
-const startDate = moment([2020, 2]);
-let endDate = moment([2020, 3]); // temporary until we determine latest data date
+const startDate = '2020-03-01';
+let endDate = '2020-04-01'; // temporary until we determine latest data date
 
 const metrics = [
   {
-    name: '# of Cases',
+    name: 'COVID-19 Cases',
     calculator: d => +d.cases,
     colorScheme: d3.schemeBlues[7],
     scale: 'quantile',
   }, {
-    name: '% of Cases by Population',
-    calculator: (d, pop) => +d.cases / pop,
-    colorScheme: d3.schemeBlues[7],
-    scale: 'quantile',
-  }, {
-    name: '# of Deaths',
+    name: 'COVID-19 Deaths',
     calculator: d => +d.deaths,
     colorScheme: d3.schemeBlues[7],
     scale: 'threshold',
     thresholds: [1, 5, 10, 100, 1000, 10000],
-  }, {
-    name: '% of Deaths by Population',
-    calculator: (d, pop) => +d.deaths / pop,
-    colorScheme: d3.schemeBlues[7],
-    scale: 'quantile',
   },
 ];
 
@@ -110,13 +111,14 @@ export default {
   data: () => ({
     colorScale: d3.scaleQuantile(),
     covidData: [],
-    currentDate: endDate.format('YYYY-MM-DD'), // temporary until we determine latest data date
+    currentDate: endDate, // temporary until we determine latest data date
     currentDaysSinceStart: 30, // temporary until we determine latest data date
     currentMetric: metrics[0].name,
     info: visualizations.find(v => v.url === 'covid'),
     metrics,
     numDaysSinceStart: 30, // temporary until we determine latest data date
     popDataByFips: {},
+    showMetricAsPercentage: false,
   }),
 
   async mounted() {
@@ -136,9 +138,9 @@ export default {
 
     // Determine the last date that there is data for
     // Assume that the last row of data is the latest
-    endDate = moment(covidData[covidData.length - 1].date);
-    this.currentDate = endDate.format('YYYY-MM-DD');
-    this.numDaysSinceStart = endDate.diff(startDate, 'days');
+    endDate = covidData[covidData.length - 1].date;
+    this.currentDate = endDate;
+    this.numDaysSinceStart = moment(endDate).diff(moment(startDate), 'days');
     this.currentDaysSinceStart = this.numDaysSinceStart;
 
     // Create components
@@ -175,18 +177,17 @@ export default {
         .attr("d", path);
     },
 
-    drawForDate(date) {
-    },
-
     drawSliderDisplay() {
       const timeScale = d3.scaleTime()
-        .domain([startDate.toDate(), endDate.toDate()])
+        .domain([moment(startDate).toDate(), moment(endDate).toDate()])
         .range([0, 300]); // range is the width of the slider
 
+      const endMonth = moment(endDate).month();
+      const endDay = moment(endDate).date();
       const isMajorTick = (d) => {
         const date = d.getDate();
-        if (d.getMonth() === endDate.month() && date === endDate.date()) {
-          if (endDate.date() > 10) return true;
+        if (d.getMonth() === endMonth && date === endDay) {
+          if (endDay > 10) return true;
         }
         return d.getDate() === 1;
       };
@@ -213,12 +214,44 @@ export default {
     },
 
     establishScale() {
+      // Get data for the end date
       const metric = metrics.find(m => m.name === this.currentMetric);
-      const dataByFips = this.getDataByFips();
+      const dataByFips = this.getDataByFips(endDate);
+
+      // Clear out legend content for re-draw
+      const legend = d3.select(this.$refs.legend);
+      legend.html('');
+
       if (metric.scale === 'quantile') {
         this.colorScale = d3.scaleQuantile()
           .domain(Object.values(dataByFips))
           .range(metric.colorScheme);
+
+        // Update legend
+        const quantiles = this.colorScale.quantiles();
+        const groups = legend.append('g').selectAll('g')
+          .data(metric.colorScheme)
+          .enter().append('g');
+        groups.append('rect')
+          .attr('width', 40)
+          .attr('height', 16)
+          .attr('y', (d, i) => 16 * i)
+          .style('fill', d => d);
+        groups.append('text')
+          .attr('x', 47)
+          .attr('y', (d, i) => (16 * i) + 14)
+          .text((d, i) => {
+            const lowerLimit = (i === 0) ? 0 : quantiles[i - 1];
+            const upperLimit = quantiles[i];
+            if (i === quantiles.length) {
+              return `> ${lowerLimit - 1}`;
+            }
+            if (upperLimit === lowerLimit + 1) {
+              return lowerLimit;
+            }
+            return `${lowerLimit} - ${upperLimit - 1}`;
+          });
+
       } else if (metric.scale === 'threshold') {
         this.colorScale = d3.scaleThreshold()
           .domain(metric.thresholds)
@@ -230,7 +263,7 @@ export default {
       const metric = metrics.find(m => m.name === this.currentMetric);
 
       // Filter the NYT data for the single date
-      const covidDataForDate = this.covidData.filter(d => d.date === this.currentDate);
+      const covidDataForDate = this.covidData.filter(d => d.date === date);
 
       // Create lookup by FIPS and calculate percentage of cases per population
       const dataByFips = {};
@@ -259,7 +292,7 @@ export default {
 
     updateMap() {
       // Filter the NYT data for the single date
-      const dataByFips = this.getDataByFips();
+      const dataByFips = this.getDataByFips(this.currentDate);
 
       // Color counties based on color scale
       d3.selectAll('.county')
@@ -273,6 +306,33 @@ export default {
 @import '~@/styles/legacy/bootstrap-partial.css';
 
 .covidGraphicContainer {
+  margin-top: -20px;
+
+  .mapContainer {
+    display: inline-block;
+    position: relative;
+  }
+  .map { transform: translate(-60px, 0); }
+  .legendContainer {
+    position: absolute;
+    right: -65px;
+    text-align: left;
+    top: 180px;
+  }
+  .legend {
+    height: 130px;
+    width: 100px;
+
+    text { font-size: 11px; }
+  }
+  .controls { display: flex; }
+  .controls input {
+    margin: 3px 7px 3px 0;
+    position: relative;
+    top: 0.5px;
+  }
+  .controls span { width: 120px; }
+
   .btn {
     background-color: #f6f6f6;
     font-family: 'Open Sans', sans-serif;
@@ -286,6 +346,8 @@ export default {
     stroke: white;
     stroke-linejoin: round;
   }
+
+  .metricButtonContainer { margin-top: 5px; }
 
   .datePickerContainer {
     height: 45px;
