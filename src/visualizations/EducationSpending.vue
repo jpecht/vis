@@ -45,7 +45,7 @@
 import Post from '@/components/Post.vue';
 import * as d3 from 'd3';
 import * as topojson from 'topojson';
-import $ from 'jquery';
+// import $ from 'jquery';
 import visualizations from '@/constants/VisualizationsList';
 
 export default {

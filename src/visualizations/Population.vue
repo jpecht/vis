@@ -55,12 +55,12 @@
 import Post from '@/components/Post.vue';
 import * as d3 from 'd3';
 import * as topojson from 'topojson';
-import $ from 'jquery';
+// import $ from 'jquery';
 import visualizations from '@/constants/VisualizationsList';
 
 // Import vendor CSS
-import 'bootstrap/dist/css/bootstrap.css';
-import 'bootstrap-vue/dist/bootstrap-vue.css';
+// import 'bootstrap/dist/css/bootstrap.css';
+// import 'bootstrap-vue/dist/bootstrap-vue.css';
 
 // colors! some from colorbrewer.org
 const blue_colors = ['rgb(189,215,231)','rgb(107,174,214)','rgb(49,130,189)','rgb(7,81,156)','rgb(28,53,99)'];

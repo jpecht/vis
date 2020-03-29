@@ -73,7 +73,7 @@ export default [
     title: 'DC Snowfall',
     subtitle: 'yearly snowfall in dc',
     date: 'Nov 10, 2014',
-    url: '//www.jpecht.com/vis-old/dc_snowfall.html',
+    url: '//jpecht.com/vis-old/dc_snowfall.html',
     imageFilename: 'dc_snowfall_ss.png',
   },
   {

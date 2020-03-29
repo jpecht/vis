@@ -25,9 +25,9 @@
 </template>
 
 <script>
-import Chart from 'chart.js';
+// import Chart from 'chart.js';
 import Post from '@/components/Post.vue';
-import $ from 'jquery';
+// import $ from 'jquery';
 import * as d3 from 'd3';
 import visualizations from '@/constants/VisualizationsList';
 

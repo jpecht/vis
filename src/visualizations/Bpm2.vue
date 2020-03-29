@@ -39,7 +39,7 @@
 
 <script>
 import Post from '@/components/Post.vue';
-import $ from 'jquery';
+// import $ from 'jquery';
 import visualizations from '@/constants/VisualizationsList';
 import * as d3 from 'd3';
 
