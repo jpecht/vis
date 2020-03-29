@@ -7,16 +7,31 @@
     </template>
     <div>
       <svg ref="map" />
-    </div>
-    <div class="source">
-      Source:
-      <a
-        href="https://www.census.gov/data/developers/data-sets/popest-popproj/popest.html"
-        rel="noopener noreferrer"
-        target="_blank"
-      >
-        US Census
-      </a>
+      <div class="datePickerContainer">
+        <div class="slider">
+          <vue-slider
+            :min="0"
+            :max="numDaysSinceStart"
+            :interval="1"
+            tooltip="none"
+            v-model="currentDaysSinceStart"
+            @change="handleDateChange"
+          />
+        </div>
+        <div class="dateDisplay">
+          <b>Date:</b> {{ currentDate }}
+        </div>
+      </div>
+      <div class="source">
+        Source:
+        <a
+          href="https://www.census.gov/data/developers/data-sets/popest-popproj/popest.html"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          US Census
+        </a>
+      </div>
     </div>
   </Post>
 </template>
@@ -25,10 +40,15 @@
 import Post from '@/components/Post.vue';
 import * as d3 from 'd3';
 import * as topojson from 'topojson';
+import moment from 'moment';
 import visualizations from '@/constants/VisualizationsList';
 
 const mapWidth = 600;
 const mapHeight = 450;
+
+const startDate = moment([2020, 2]);
+const endDate = moment().subtract(2, 'days');
+const numDaysSinceStart = endDate.diff(startDate, 'days');
 
 export default {
   name: 'Covid',
@@ -37,8 +57,12 @@ export default {
   },
 
   data: () => ({
+    colorScale: d3.scaleQuantile(),
     covidData: [],
+    currentDate: '',
+    currentDaysSinceStart: numDaysSinceStart,
     info: visualizations.find(v => v.url === 'covid'),
+    numDaysSinceStart,
     popDataByFips: {},
   }),
 
@@ -60,8 +84,11 @@ export default {
       this.popDataByFips[+d.fips] = +d.population;
     });
 
-    // TODO: Draw for an arbitrary date for now
-    this.drawForDate('2020-03-27');
+    // Establish scale based on data from current date
+    this.establishScale();
+
+    // Draw the map for the current date
+    this.handleDateChange();
   },
 
   methods: {
@@ -91,6 +118,25 @@ export default {
 
     drawForDate(date) {
       // Filter the NYT data for the single date
+      const covidDataForDate = this.getDataForDate(date);
+
+      // Color counties based on color scale
+      d3.selectAll('.county')
+        .style('fill', (d) => {
+          const numCases = covidDataForDate[d.id] || 0;
+          return this.colorScale(numCases);
+        });
+    },
+
+    establishScale() {
+      const dataForDate = this.getDataForDate(endDate.format('YYYY-MM-DD'));
+      this.colorScale
+        .domain(Object.values(dataForDate))
+        .range(d3.schemeBlues[7]);
+    },
+
+    getDataForDate(date) {
+      // Filter the NYT data for the single date
       const covidDataForDate = this.covidData.filter(d => d.date === date);
 
       // Create lookup by FIPS and calculate percentage of cases per population
@@ -103,18 +149,14 @@ export default {
         percentageCasesByFips[fips] = percentageCases;
       });
 
-      // Establish quantile scale
-      const scale = d3.scaleQuantile()
-        .domain(Object.values(percentageCasesByFips))
-        .range(d3.schemeBlues[7]);
+      return percentageCasesByFips;
+    },
 
-      console.log(scale.quantiles());
-
-      d3.selectAll('.county')
-        .style('fill', (d) => {
-          const numCases = percentageCasesByFips[d.id] || 0;
-          return scale(numCases);
-        });
+    handleDateChange() {
+      const currentDate = moment(startDate).add(this.currentDaysSinceStart, 'days');
+      const dateString = currentDate.format('YYYY-MM-DD');
+      this.drawForDate(dateString);
+      this.currentDate = currentDate.format('MM/DD/YYYY');
     },
   },
 };
@@ -129,6 +171,14 @@ export default {
   fill: none;
   stroke: white;
   stroke-linejoin: round;
+}
+
+.datePickerContainer { text-align: center; }
+.dateDisplay { margin-top: 5px; }
+
+.slider {
+  display: inline-block;
+  width: 300px;
 }
 
 .source {

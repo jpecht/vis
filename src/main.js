@@ -5,6 +5,9 @@ import App from './App.vue';
 import router from './router';
 import store from './store';
 
+// Import vendor CSS  
+import 'vue-slider-component/theme/default.css';
+
 // Import global CSS
 import '@/styles/main.scss';
 
