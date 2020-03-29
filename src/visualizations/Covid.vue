@@ -8,6 +8,16 @@
     <div>
       <svg ref="map" />
     </div>
+    <div class="source">
+      Source:
+      <a
+        href="https://www.census.gov/data/developers/data-sets/popest-popproj/popest.html"
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        US Census
+      </a>
+    </div>
   </Post>
 </template>
 
@@ -25,14 +35,37 @@ export default {
   components: {
     Post,
   },
+
   data: () => ({
+    covidData: [],
     info: visualizations.find(v => v.url === 'covid'),
+    popDataByFips: {},
   }),
-  mounted() {
-    this.createVis();
+
+  async mounted() {
+    const [us, covidData, popData] = await Promise.all([
+      d3.json('./data/us.json'),
+      d3.csv('https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv'),
+      d3.tsv('./data/population_2019.tsv'),
+    ]);
+
+    // Create the map
+    this.createMap(us);
+
+    // Save COVID data
+    this.covidData = covidData;
+
+    // Create the lookup for population by FIPS
+    popData.forEach((d) => {
+      this.popDataByFips[+d.fips] = +d.population;
+    });
+
+    // TODO: Draw for an arbitrary date for now
+    this.drawForDate('2020-03-27');
   },
+
   methods: {
-    async createVis() {        
+    createMap(us) {
       const projection = d3.geoAlbersUsa()
         .scale(800)
         .translate([mapWidth / 2, mapHeight / 2]);
@@ -40,11 +73,6 @@ export default {
       const map = d3.select(this.$refs.map)
         .attr('width', mapWidth)
         .attr('height', mapHeight);
-      
-      const [us, covidData] = await Promise.all([
-        d3.json('./data/us.json'),
-        d3.csv('https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv'),
-      ]);
 
       // Draw the map
       const counties = topojson.feature(us, us.objects.counties).features;
@@ -59,24 +87,32 @@ export default {
       map.append("path").datum(states)
         .attr("class", "states")
         .attr("d", path);
+    },
 
-      // Color counties for single date for now
-      const recentCovidData = covidData.filter(d => d.date === '2020-03-27');
-      const maxCases = d3.max(recentCovidData, d => +d.cases);
-      console.log(maxCases);
+    drawForDate(date) {
+      // Filter the NYT data for the single date
+      const covidDataForDate = this.covidData.filter(d => d.date === date);
 
-      const casesByFips = d3.map();
-      recentCovidData.forEach((d) => {
-        casesByFips.set(+d.fips, +d.cases);
+      // Create lookup by FIPS and calculate percentage of cases per population
+      const percentageCasesByFips = {};
+      covidDataForDate.forEach((d) => {
+        const fips = +d.fips;
+        const numCases = +d.cases || 0;
+        const population = this.popDataByFips[fips];
+        const percentageCases = population ? (numCases / population) : 0;
+        percentageCasesByFips[fips] = percentageCases;
       });
 
-      const scale = d3.scaleThreshold()
-        .domain([10, 50, 100, 200, 500, 1000])
+      // Establish quantile scale
+      const scale = d3.scaleQuantile()
+        .domain(Object.values(percentageCasesByFips))
         .range(d3.schemeBlues[7]);
+
+      console.log(scale.quantiles());
 
       d3.selectAll('.county')
         .style('fill', (d) => {
-          const numCases = casesByFips.get(d.id) || 0;
+          const numCases = percentageCasesByFips[d.id] || 0;
           return scale(numCases);
         });
     },
@@ -93,5 +129,10 @@ export default {
   fill: none;
   stroke: white;
   stroke-linejoin: round;
+}
+
+.source {
+  font-size: 11px;
+  text-align: right;
 }
 </style>
