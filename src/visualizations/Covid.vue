@@ -9,15 +9,21 @@
       </p>
     </template>
     <div class="covidGraphicContainer">
+      <h2 class="chartTitle">{{ chartTitle }}</h2>
       <div>
         <div class="mapContainer">
           <svg ref="map" class="map" />
           <div class="legendContainer">
             <svg ref="legend" class="legend" />
-            <div class="controls">
-              <input type="checkbox" v-model="showMetricAsPercentage">
-              <span>View as percentage of population</span>
-            </div>
+            <label class="controls">
+              <input
+                type="checkbox"
+                v-model="showMetricAsPercentage"
+                :disabled="currentMetric === 'COVID-19 Deaths'"
+                @change="handleControlsChange"
+              />
+              <span>View values as % of population</span>
+            </label>
           </div>
         </div>
       </div>
@@ -98,7 +104,7 @@ const metrics = [
     calculator: d => +d.deaths,
     colorScheme: d3.schemeBlues[7],
     scale: 'threshold',
-    thresholds: [1, 5, 10, 100, 1000, 10000],
+    thresholds: [1, 2, 5, 10, 100, 1000],
   },
 ];
 
@@ -109,6 +115,7 @@ export default {
   },
 
   data: () => ({
+    chartTitle: '',
     colorScale: d3.scaleQuantile(),
     covidData: [],
     currentDate: endDate, // temporary until we determine latest data date
@@ -118,7 +125,7 @@ export default {
     metrics,
     numDaysSinceStart: 30, // temporary until we determine latest data date
     popDataByFips: {},
-    showMetricAsPercentage: false,
+    showMetricAsPercentage: true,
   }),
 
   async mounted() {
@@ -221,42 +228,56 @@ export default {
       // Clear out legend content for re-draw
       const legend = d3.select(this.$refs.legend);
       legend.html('');
+      let categories = [];
 
-      if (metric.scale === 'quantile') {
+      if (metric.scale === 'quantile' || this.showMetricAsPercentage) {
         this.colorScale = d3.scaleQuantile()
           .domain(Object.values(dataByFips))
           .range(metric.colorScheme);
-
-        // Update legend
-        const quantiles = this.colorScale.quantiles();
-        const groups = legend.append('g').selectAll('g')
-          .data(metric.colorScheme)
-          .enter().append('g');
-        groups.append('rect')
-          .attr('width', 40)
-          .attr('height', 16)
-          .attr('y', (d, i) => 16 * i)
-          .style('fill', d => d);
-        groups.append('text')
-          .attr('x', 47)
-          .attr('y', (d, i) => (16 * i) + 14)
-          .text((d, i) => {
-            const lowerLimit = (i === 0) ? 0 : quantiles[i - 1];
-            const upperLimit = quantiles[i];
-            if (i === quantiles.length) {
-              return `> ${lowerLimit - 1}`;
-            }
-            if (upperLimit === lowerLimit + 1) {
-              return lowerLimit;
-            }
-            return `${lowerLimit} - ${upperLimit - 1}`;
-          });
-
+        categories = this.colorScale.quantiles();
       } else if (metric.scale === 'threshold') {
         this.colorScale = d3.scaleThreshold()
           .domain(metric.thresholds)
           .range(metric.colorScheme);
+        categories = metric.thresholds;
       }
+
+      // Determine what legend colors and text to display
+      const getLegendText = (i) => {
+        const lowerLimit = (i === 0) ? 0 : categories[i - 1];
+        const upperLimit = categories[i];
+
+        // Format legend text when showing percentages
+        if (this.showMetricAsPercentage) {
+          const format = d => (d === 0) ? '0%' : d3.format('.3%')(d);
+          if (i === categories.length) return `> ${format(lowerLimit)}`;
+          const lowerLimitFormatted = format(lowerLimit);
+          return `${lowerLimitFormatted.slice(0, lowerLimitFormatted.length - 1)} - ${format(upperLimit)}`;
+        }
+
+        // Format legend text when showing absolute values
+        if (i === categories.length) return `> ${lowerLimit - 1}`;
+        if (upperLimit === lowerLimit + 1) return lowerLimit;
+        return `${lowerLimit} - ${upperLimit - 1}`;
+      };
+      const legendData = metric.colorScheme.map((color, i) => ({
+        color,
+        text: getLegendText(i),
+      }));
+
+      // Re-draw legend
+      const groups = legend.append('g').selectAll('g')
+        .data(legendData)
+        .enter().append('g');
+      groups.append('rect')
+        .attr('width', 40)
+        .attr('height', 16)
+        .attr('y', (d, i) => 16 * i)
+        .style('fill', d => d.color);
+      groups.append('text')
+        .attr('x', 47)
+        .attr('y', (d, i) => (16 * i) + 14)
+        .text(d => d.text);
     },
 
     getDataByFips(date) {
@@ -269,13 +290,26 @@ export default {
       const dataByFips = {};
       covidDataForDate.forEach((d) => {
         const fips = +d.fips;
-        const population = this.popDataByFips[fips];
-        if (!population) return 0;
+        let value = metric.calculator(d);
 
-        dataByFips[fips] = metric.calculator(d, population);
+        if (this.showMetricAsPercentage) {
+          const population = this.popDataByFips[fips];
+          if (!population) {
+            dataByFips[fips] = 0;
+            return;
+          }
+          value /= population;
+        }
+
+        dataByFips[fips] = value;
       });
 
       return dataByFips;
+    },
+
+    handleControlsChange() {
+      this.establishScale();
+      this.updateMap();
     },
 
     handleDateChange() {
@@ -285,6 +319,7 @@ export default {
     },
 
     handleMetricChange(metric) {
+      if (metric.name === 'COVID-19 Deaths') this.showMetricAsPercentage = false;
       this.currentMetric = metric.name;
       this.establishScale();
       this.updateMap();
@@ -297,6 +332,9 @@ export default {
       // Color counties based on color scale
       d3.selectAll('.county')
         .style('fill', d => this.colorScale(dataByFips[d.id] || 0));
+
+      // Update chart title
+      this.chartTitle = `${this.currentMetric} by County`;
     },
   },
 };
@@ -306,10 +344,16 @@ export default {
 @import '~@/styles/legacy/bootstrap-partial.css';
 
 .covidGraphicContainer {
-  margin-top: -20px;
+  margin-top: -10px;
+
+  .chartTitle {
+    font-weight: 300;
+    font-size: 22px;
+  }
 
   .mapContainer {
     display: inline-block;
+    margin-top: -25px;
     position: relative;
   }
   .map { transform: translate(-60px, 0); }
@@ -321,7 +365,7 @@ export default {
   }
   .legend {
     height: 130px;
-    width: 100px;
+    width: 150px;
 
     text { font-size: 11px; }
   }
@@ -331,7 +375,7 @@ export default {
     position: relative;
     top: 0.5px;
   }
-  .controls span { width: 120px; }
+  .controls span { width: 100px; }
 
   .btn {
     background-color: #f6f6f6;
