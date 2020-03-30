@@ -358,8 +358,7 @@ export default {
 .covidGraphicContainer {
   background-color: #d3d3d3;
   border: 1px solid #999;
-  margin-top: -10px;
-  padding: 5px 10px 10px;
+  padding: 10px;
 
   .chartTitle {
     font-weight: 300;
@@ -368,7 +367,7 @@ export default {
 
   .mapContainer {
     display: inline-block;
-    margin-top: -25px;
+    margin-top: -30px;
     position: relative;
   }
   .map { transform: translate(-60px, 0); }
@@ -409,7 +408,7 @@ export default {
   .metricButtonContainer { margin-top: 5px; }
 
   .datePickerContainer {
-    height: 45px;
+    height: 40px;
     margin: 15px 0;
     text-align: center;
   }
