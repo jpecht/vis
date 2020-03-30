@@ -38,34 +38,43 @@
           </div>
         </div>
       </div>
-      <div class="metricButtonContainer">
-        <div class="btn-group">
-          <button
-            v-for="metric in metrics"
-            :key="metric.name"
-            :class="['btn', 'btn-default', {
-              active: currentMetric === metric.name,
-            }]"
-            @click="handleMetricChange(metric)"
-          >
-            {{ metric.name }}
-          </button>
+      <div class="bottomContainer">
+        <div class="metricContainer">
+          <div>
+            <div class="btn-group">
+              <button
+                v-for="metric in metrics"
+                :key="metric.name"
+                :class="['btn', 'btn-default', {
+                  active: currentMetric === metric.name,
+                }]"
+                @click="handleMetricChange(metric)"
+              >
+                {{ metric.name }}
+              </button>
+            </div>
+          </div>
+          <div class="datePickerContainer">
+            <div class="slider">
+              <vue-slider
+                :min="0"
+                :max="numDaysSinceStart"
+                :interval="1"
+                tooltip="none"
+                v-model="currentDaysSinceStart"
+                @change="handleDateChange"
+              />
+              <svg
+                ref="sliderDisplay"
+                class="sliderDisplay"
+              />
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="datePickerContainer">
-        <div class="slider">
-          <vue-slider
-            :min="0"
-            :max="numDaysSinceStart"
-            :interval="1"
-            tooltip="none"
-            v-model="currentDaysSinceStart"
-            @change="handleDateChange"
-          />
-          <svg
-            ref="sliderDisplay"
-            class="sliderDisplay"
-          />
+        <div class="infoContainer">
+          <div><b>{{ currentCountyName }}</b></div>
+          <div>{{ currentCountyCases }} cases ({{ currentCountyCasesPerc }} per mil)</div>
+          <div>{{ currentCountyDeaths }} deaths</div>
         </div>
       </div>
       <div class="source">
@@ -121,6 +130,8 @@ const metrics = [
   },
 ];
 
+const percentageFormat = d => d3.format('.2s')(d * 1e6);
+
 export default {
   name: 'Covid',
   components: {
@@ -131,9 +142,11 @@ export default {
     chartTitle: '',
     colorScale: d3.scaleQuantile(),
     covidData: [],
+    currentCountyId: '',
     currentDate: endDate, // temporary until we determine latest data date
     currentDaysSinceStart: 30, // temporary until we determine latest data date
     currentMetric: metrics[0].name,
+    dataByFips: {},
     info: visualizations.find(v => v.url === 'covid'),
     loading: true,
     metrics,
@@ -143,6 +156,26 @@ export default {
   }),
 
   computed: {
+    currentCountyCases() {
+      if (!this.dataByFips[this.currentCountyId]) return 0;
+      return this.dataByFips[this.currentCountyId]['COVID-19 Cases'].total;
+    },
+    currentCountyCasesPerc() {
+      if (!this.dataByFips[this.currentCountyId]) return 0;
+      return percentageFormat(this.dataByFips[this.currentCountyId]['COVID-19 Cases'].percentage);
+    },
+    currentCountyDeaths() {
+      if (!this.dataByFips[this.currentCountyId]) return 0;
+      return this.dataByFips[this.currentCountyId]['COVID-19 Deaths'].total;
+    },
+    currentCountyDeathsPerc() {
+      if (!this.dataByFips[this.currentCountyId]) return 0;
+      return percentageFormat(this.dataByFips[this.currentCountyId]['COVID-19 Deaths'].percentage);
+    },
+    currentCountyName() {
+      if (!this.dataByFips[this.currentCountyId]) return '';
+      return this.dataByFips[this.currentCountyId].name;
+    },
     metricNoun() { return metrics.find(m => m.name === this.currentMetric).noun; },
   },
 
@@ -175,7 +208,7 @@ export default {
     this.drawSliderDisplay();
 
     // Update the scale and map
-    this.establishScale();
+    this.updateScale();
     this.updateMap();
   },
 
@@ -202,6 +235,11 @@ export default {
       map.append("path").datum(states)
         .attr("class", "states")
         .attr("d", path);
+
+      // Add hover watch
+      map.selectAll('.county').on('mouseover', (d) => {
+        this.currentCountyId = d.id;
+      });
     },
 
     drawSliderDisplay() {
@@ -240,7 +278,76 @@ export default {
           .attr('y2', 4);
     },
 
-    establishScale() {
+    getDataByFips(date) {
+      const metric = metrics.find(m => m.name === this.currentMetric);
+
+      // Filter the NYT data for the single date
+      const covidDataForDate = this.covidData.filter(d => d.date === date);
+
+      // Create data lookup object indexed by FIPS
+      const dataByFips = {};
+      covidDataForDate.forEach((d) => {
+        const fips = +d.fips;
+        dataByFips[fips] = {
+          name: `${d.county}, ${d.state}`,
+        };
+
+        // Populate data lookup with each metric
+        metrics.forEach((metric) => {
+          const value = metric.calculator(d);
+          let percValue = 0;
+
+          const population = this.popDataByFips[fips];
+          if (population) percValue = value / population;
+
+          dataByFips[fips][metric.name] = {
+            percentage: percValue,
+            total: value,
+          };
+        });
+      });
+
+      return dataByFips;
+    },
+
+    handleControlsChange() {
+      this.updateScale();
+      this.updateMap();
+    },
+
+    handleDateChange() {
+      const currentDate = moment(startDate).add(this.currentDaysSinceStart, 'days');
+      this.currentDate = currentDate.format('YYYY-MM-DD');
+      this.updateMap();
+    },
+
+    handleMetricChange(metric) {
+      if (metric.name === 'COVID-19 Deaths') this.showMetricAsPercentage = false;
+      this.currentMetric = metric.name;
+      this.updateScale();
+      this.updateMap();
+    },
+
+    updateMap() {
+      // Filter the NYT data for the single date
+      this.dataByFips = this.getDataByFips(this.currentDate);
+
+      // Color counties based on color scale
+      const property = this.showMetricAsPercentage ? 'percentage' : 'total';
+      d3.selectAll('.county')
+        .style('fill', (d) => {
+          let value = 0;
+          if (this.dataByFips[d.id]) {
+            value = this.dataByFips[d.id][this.currentMetric][property];
+          }
+          return this.colorScale(value);
+        });
+
+      // Update chart title
+      this.chartTitle = `${this.currentMetric} by County`;
+    },
+
+    updateScale() {
       // Get data for the end date
       const metric = metrics.find(m => m.name === this.currentMetric);
       const dataByFips = this.getDataByFips(endDate);
@@ -251,8 +358,10 @@ export default {
       let categories = [];
 
       if (metric.scale === 'quantile' || this.showMetricAsPercentage) {
+        const property = this.showMetricAsPercentage ? 'percentage' : 'total';
+        const values = Object.values(dataByFips).map(d => d[this.currentMetric][property]);
         this.colorScale = d3.scaleQuantile()
-          .domain(Object.values(dataByFips))
+          .domain(values)
           .range(metric.colorScheme);
         categories = this.colorScale.quantiles();
       } else if (metric.scale === 'threshold') {
@@ -269,7 +378,7 @@ export default {
 
         // Format legend text when showing percentages
         if (this.showMetricAsPercentage) {
-          const format = d => (d === 0) ? '0' : d3.format('.2s')(d * 1e6);
+          const format = d => (d === 0) ? '0' : percentageFormat(d);
           if (i === categories.length) return `> ${format(lowerLimit)} per mil`;
           return `${format(lowerLimit)} - ${format(upperLimit)} per mil`;
         }
@@ -298,63 +407,6 @@ export default {
         .attr('y', (d, i) => (16 * i) + 14)
         .text(d => d.text);
     },
-
-    getDataByFips(date) {
-      const metric = metrics.find(m => m.name === this.currentMetric);
-
-      // Filter the NYT data for the single date
-      const covidDataForDate = this.covidData.filter(d => d.date === date);
-
-      // Create lookup by FIPS and calculate percentage of cases per population
-      const dataByFips = {};
-      covidDataForDate.forEach((d) => {
-        const fips = +d.fips;
-        let value = metric.calculator(d);
-
-        if (this.showMetricAsPercentage) {
-          const population = this.popDataByFips[fips];
-          if (!population) {
-            dataByFips[fips] = 0;
-            return;
-          }
-          value /= population;
-        }
-
-        dataByFips[fips] = value;
-      });
-
-      return dataByFips;
-    },
-
-    handleControlsChange() {
-      this.establishScale();
-      this.updateMap();
-    },
-
-    handleDateChange() {
-      const currentDate = moment(startDate).add(this.currentDaysSinceStart, 'days');
-      this.currentDate = currentDate.format('YYYY-MM-DD');
-      this.updateMap();
-    },
-
-    handleMetricChange(metric) {
-      if (metric.name === 'COVID-19 Deaths') this.showMetricAsPercentage = false;
-      this.currentMetric = metric.name;
-      this.establishScale();
-      this.updateMap();
-    },
-
-    updateMap() {
-      // Filter the NYT data for the single date
-      const dataByFips = this.getDataByFips(this.currentDate);
-
-      // Color counties based on color scale
-      d3.selectAll('.county')
-        .style('fill', d => this.colorScale(dataByFips[d.id] || 0));
-
-      // Update chart title
-      this.chartTitle = `${this.currentMetric} by County`;
-    },
   },
 };
 </script>
@@ -372,12 +424,21 @@ export default {
     font-size: 22px;
   }
 
+  /* -------- Map -------- */
   .mapContainer {
     display: inline-block;
     margin-top: -30px;
     position: relative;
   }
   .map { transform: translate(-60px, 0); }
+  .counties { fill: none; }
+  .states {
+    fill: none;
+    stroke: white;
+    stroke-linejoin: round;
+  }
+
+  /* -------- Legend -------- */
   .legendContainer {
     position: absolute;
     right: -65px;
@@ -398,21 +459,33 @@ export default {
   }
   .controls span { width: 120px; }
 
+  /* -------- Info Container ---------- */
+  .bottomContainer {
+    align-items: flex-start;
+    display: flex;
+    margin-top: 5px;
+  }
+  .metricContainer { flex: 1; }
+  .infoContainer {
+    background-color: rgba(255, 255, 255, 0.6);
+    border: 1px solid #999;
+    border-radius: 4px;
+    display: inline-block;
+    padding: 10px 20px;
+    right: 0;
+    text-align: left;
+    top: 0;
+    width: 200px;
+  }
+
+
+  /* -------- Buttons and Sliders -------- */
   .btn {
     background-color: #f6f6f6;
     font-family: 'Open Sans', sans-serif;
     font-size: 13px;
     padding: 3px 12px;
   }
-
-  .counties { fill: none; }
-  .states {
-    fill: none;
-    stroke: white;
-    stroke-linejoin: round;
-  }
-
-  .metricButtonContainer { margin-top: 5px; }
 
   .datePickerContainer {
     height: 40px;
