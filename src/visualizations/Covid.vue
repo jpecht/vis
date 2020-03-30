@@ -8,7 +8,16 @@
         updates as NYT updates their dataset.
       </p>
     </template>
-    <div class="covidGraphicContainer">
+    <div
+      v-if="loading"
+      class="covidGraphicLoadingIndicator"
+    >
+      Loading data...
+    </div>
+    <div
+      v-show="!loading"
+      class="covidGraphicContainer"
+    >
       <h2 class="chartTitle">{{ chartTitle }}</h2>
       <div>
         <div class="mapContainer">
@@ -102,7 +111,7 @@ const metrics = [
   }, {
     name: 'COVID-19 Deaths',
     calculator: d => +d.deaths,
-    colorScheme: d3.schemeReds[7],
+    colorScheme: d3.schemePuRd[7],
     scale: 'threshold',
     thresholds: [1, 2, 5, 10, 100, 1000],
   },
@@ -122,6 +131,7 @@ export default {
     currentDaysSinceStart: 30, // temporary until we determine latest data date
     currentMetric: metrics[0].name,
     info: visualizations.find(v => v.url === 'covid'),
+    loading: true,
     metrics,
     numDaysSinceStart: 30, // temporary until we determine latest data date
     popDataByFips: {},
@@ -134,6 +144,8 @@ export default {
       d3.csv('https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv'),
       d3.tsv('./data/population_2019.tsv'),
     ]);
+
+    this.loading = false;
 
     // Save COVID data
     this.covidData = covidData;
@@ -344,7 +356,10 @@ export default {
 @import '~@/styles/legacy/bootstrap-partial.css';
 
 .covidGraphicContainer {
+  background-color: #d3d3d3;
+  border: 1px solid #999;
   margin-top: -10px;
+  padding: 5px 10px 10px;
 
   .chartTitle {
     font-weight: 300;
@@ -422,5 +437,12 @@ export default {
     font-size: 11px;
     text-align: right;
   }
+}
+
+.covidGraphicLoadingIndicator {
+  font-size: 18px;
+  font-weight: 300;
+  padding: 30px;
+  text-align: center;
 }
 </style>
