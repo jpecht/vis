@@ -24,14 +24,16 @@
           <svg ref="map" class="map" />
           <div class="legendContainer">
             <svg ref="legend" class="legend" />
-            <label class="controls">
+            <label
+              v-show="currentMetric !== 'COVID-19 Deaths'"
+              class="controls"
+            >
               <input
                 type="checkbox"
                 v-model="showMetricAsPercentage"
-                :disabled="currentMetric === 'COVID-19 Deaths'"
                 @change="handleControlsChange"
               />
-              <span>View values as % of population</span>
+              <span>View values as # of {{ metricNoun }} per million</span>
             </label>
           </div>
         </div>
@@ -107,11 +109,13 @@ const metrics = [
     name: 'COVID-19 Cases',
     calculator: d => +d.cases,
     colorScheme: d3.schemeBlues[7],
+    noun: 'cases',
     scale: 'quantile',
   }, {
     name: 'COVID-19 Deaths',
     calculator: d => +d.deaths,
     colorScheme: d3.schemePuRd[7],
+    noun: 'deaths',
     scale: 'threshold',
     thresholds: [1, 2, 5, 10, 100, 1000],
   },
@@ -137,6 +141,10 @@ export default {
     popDataByFips: {},
     showMetricAsPercentage: true,
   }),
+
+  computed: {
+    metricNoun() { return metrics.find(m => m.name === this.currentMetric).noun; },
+  },
 
   async mounted() {
     const [us, covidData, popData] = await Promise.all([
@@ -261,10 +269,9 @@ export default {
 
         // Format legend text when showing percentages
         if (this.showMetricAsPercentage) {
-          const format = d => (d === 0) ? '0%' : d3.format('.3%')(d);
-          if (i === categories.length) return `> ${format(lowerLimit)}`;
-          const lowerLimitFormatted = format(lowerLimit);
-          return `${lowerLimitFormatted.slice(0, lowerLimitFormatted.length - 1)} - ${format(upperLimit)}`;
+          const format = d => (d === 0) ? '0' : d3.format('.2s')(d * 1e6);
+          if (i === categories.length) return `> ${format(lowerLimit)} per mil`;
+          return `${format(lowerLimit)} - ${format(upperLimit)} per mil`;
         }
 
         // Format legend text when showing absolute values
@@ -389,7 +396,7 @@ export default {
     position: relative;
     top: 0.5px;
   }
-  .controls span { width: 100px; }
+  .controls span { width: 120px; }
 
   .btn {
     background-color: #f6f6f6;
