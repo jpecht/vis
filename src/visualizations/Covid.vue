@@ -72,7 +72,7 @@
           </div>
         </div>
         <div class="infoContainer">
-          <div><b>{{ currentCountyName }}</b></div>
+          <div><b>{{ nameByFips[currentCountyId] || '' }}</b></div>
           <div>{{ currentCountyCases }} cases ({{ currentCountyCasesPerc }} per mil)</div>
           <div>{{ currentCountyDeaths }} deaths</div>
         </div>
@@ -150,6 +150,7 @@ export default {
     info: visualizations.find(v => v.url === 'covid'),
     loading: true,
     metrics,
+    nameByFips: {},
     numDaysSinceStart: 30, // temporary until we determine latest data date
     popDataByFips: {},
     showMetricAsPercentage: true,
@@ -172,10 +173,6 @@ export default {
       if (!this.dataByFips[this.currentCountyId]) return 0;
       return percentageFormat(this.dataByFips[this.currentCountyId]['COVID-19 Deaths'].percentage);
     },
-    currentCountyName() {
-      if (!this.dataByFips[this.currentCountyId]) return '';
-      return this.dataByFips[this.currentCountyId].name;
-    },
     metricNoun() { return metrics.find(m => m.name === this.currentMetric).noun; },
   },
 
@@ -194,6 +191,7 @@ export default {
     // Create the lookup for population by FIPS
     popData.forEach((d) => {
       this.popDataByFips[+d.fips] = +d.population;
+      this.nameByFips[+d.fips] = d.fullname;
     });
 
     // Determine the last date that there is data for
@@ -288,9 +286,7 @@ export default {
       const dataByFips = {};
       covidDataForDate.forEach((d) => {
         const fips = +d.fips;
-        dataByFips[fips] = {
-          name: `${d.county}, ${d.state}`,
-        };
+        dataByFips[fips] = {};
 
         // Populate data lookup with each metric
         metrics.forEach((metric) => {
@@ -475,7 +471,7 @@ export default {
     right: 0;
     text-align: left;
     top: 0;
-    width: 200px;
+    width: 250px;
   }
 
 
