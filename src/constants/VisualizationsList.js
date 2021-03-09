@@ -1,11 +1,11 @@
 export default [
-  {
+  /* {
     title: 'COVID-19 in US',
     subtitle: 'a look at the growth of COVID-19 cases',
     date: 'Mar 29, 2020',
     url: 'covid',
     imageFilename: 'covid_ss.png',
-  },
+  }, */
   {
     title: 'Weather in Boulder',
     subtitle: 'a look at the weather in 2019',
