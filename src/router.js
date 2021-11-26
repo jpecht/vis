@@ -78,6 +78,10 @@ export default new Router({
       component: () => import('./visualizations/MarchMadness.vue'),
     },
     {
+      path: '/midnight',
+      component: () => import('./visualizations/Midnight.vue'),
+    },
+    {
       path: '/population',
       component: () => import('./visualizations/Population.vue'),
     },
