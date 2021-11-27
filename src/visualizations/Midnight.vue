@@ -21,7 +21,7 @@
         My first attempt involved simply simulating all outcomes of the game using a simple strategy
          where you take qualifiers (1s and 4s) immediately and take any 6s that are rolled (unless you still need qualifiers).
       </p>
-      <svg class="spread-chart-midnight-exclusive" />
+      <svg class="spread-chart-sixes" />
       <p>
         As you can see, there are over a quadrillion total outcomes and about 12 billion unique outcomes. The simulation itself took about 32 min to run on my laptop. Luckily, I had some spare time over Thanksgiving haha.
       </p>
@@ -33,6 +33,7 @@
         This would be a more conservative strategy since you're willing to settle for 5s.
       </p>
       <svg class="spread-chart-fives" />
+      <svg class="spread-chart-fives-diff" />
       <p>
         This strategy predictably fared less well than the first strategy.
         There really isn't much upside to this strategy.
@@ -42,7 +43,16 @@
         This should theoretically give you more chances to roll a 6 with the extra die to roll.
       </p>
       <svg class="spread-chart-one-qualifier" />
+      <svg class="spread-chart-one-qualifier-diff" />
       <p>
+        The results were a little confusing. I'm not sure why there was <i>less</i> of a chance of
+        getting no score, since the difference in strategy means you're not automatically taking
+        both qualifiers. However, it looks like with this strategy, you're slightly less likely
+        to get Midnight, but you have a slightly higher average.
+      </p>
+      <p>
+        In conclusion, it looks like both strategies are fairly viable.
+        You might consider the first strategy if you're going for a higher score though.
         If you are interested in the code, you can view the
         <a href="//github.com/jpecht/midnight-simnulator">repository on Github here</a>.
         It was written in Node and includes options to use each of the strategies I've outlined above.
@@ -65,126 +75,101 @@ export default {
     info: visualizations.find(v => v.url === 'midnight'),
     spreads: {
       oneQualifier: {
-        0: 439349864180324,
+        0: 505348509159014,
         1: 0,
         2: 0,
         3: 0,
-        4: 56532874,
-        5: 1622187972,
-        6: 19592428582,
-        7: 137515752625,
-        8: 666350058778,
-        9: 2502732945513,
-        10: 7895741410766,
-        11: 21256544004656,
-        12: 49280928022575,
-        13: 99422072316537,
-        14: 178119102418601,
-        15: 282981274783352,
-        16: 395865490195293,
-        17: 495393215474158,
-        18: 557063669886873,
-        19: 550094996676154,
-        20: 474441699317119,
-        21: 367565156877771,
-        22: 252808611515685,
-        23: 141772935304940,
-        24: 45708587419198,
-      },
-      oneQualifierDifference: {
-        0: -0.010129419634543141,
-        1: 0,
-        2: 0,
-        3: 0,
-        4: 1.483175790042076e-9,
-        5: 5.3072723992511825e-8,
-        6: 7.192345903569957e-7,
-        7: 0.0000050858210124164176,
-        8: 0.0000225535753190565,
-        9: 0.0000721047754352809,
-        10: 0.00019367293818805392,
-        11: 0.0004475969731545619,
-        12: 0.0008758659825883752,
-        13: 0.0014117440786375543,
-        14: 0.002035083161100827,
-        15: 0.002628283308924284,
-        16: 0.002618745328630198,
-        17: 0.0020059088809382675,
-        18: 0.0013097021107026652,
-        19: 0.0005307977189464019,
-        20: -0.00038578650807216675,
-        21: -0.0014346516146531846,
-        22: -0.0013463846471470711,
-        23: -0.000578495794074256,
-        24: -0.0002831802455782514,
+        4: 63888286,
+        5: 1835023638,
+        6: 22180681724,
+        7: 155594262649,
+        8: 753041412070,
+        9: 2826511571932,
+        10: 8921174392930,
+        11: 24016886757467,
+        12: 55637282287562,
+        13: 112290109091018,
+        14: 201120519884350,
+        15: 319221359910122,
+        16: 446483662434771,
+        17: 558429277538151,
+        18: 627148604940358,
+        19: 619147154121488,
+        20: 534349241774918,
+        21: 413776627784478,
+        22: 284904265223372,
+        23: 160867625546708,
+        24: 52249083457540,
       },
       fives: {
-        0: 5283894819690,
+        0: 5209074573930,
         1: 0,
         2: 0,
         3: 0,
-        4: 1190392,
-        5: 33828616,
-        6: 412016534,
-        7: 2951013721,
-        8: 14424357869,
-        9: 52729007311,
-        10: 156177248888,
-        11: 389575708289,
-        12: 839488679252,
-        13: 1560225674769,
-        14: 2564393305759,
-        15: 3742268257844,
-        16: 4847833550866,
-        17: 5615214994773,
-        18: 5813194906188,
-        19: 5383997576924,
-        20: 4438412216568,
-        21: 3234403142905,
-        22: 2010013821754,
-        23: 938317841762,
-        24: 235833133982,
+        4: 1187732,
+        5: 33684132,
+        6: 408921738,
+        7: 2916638787,
+        8: 14205844894,
+        9: 51895526776,
+        10: 154020129847,
+        11: 384703172397,
+        12: 827076366753,
+        13: 1538051173361,
+        14: 2523240533632,
+        15: 3670861824288,
+        16: 4748666454840,
+        17: 5489112721096,
+        18: 5673816899622,
+        19: 5255423885214,
+        20: 4334971341689,
+        21: 3163326792587,
+        22: 1967710072333,
+        23: 917908867464,
+        24: 230587413864,
       },
-      midnightExclusive: {
-        0: 151104652521194,
+      sixes: {
+        0: 149541432580874,
         1: 0,
         2: 0,
         3: 0,
-        4: 15644510,
-        5: 434580496,
-        6: 5142116926,
-        7: 36040284597,
-        8: 177487488846,
-        9: 683804106533,
-        10: 2203383925358,
-        11: 6032452968788,
-        12: 14206191067251,
-        13: 29144678070775,
-        14: 52887594507421,
-        15: 84848152865368,
-        16: 120137251750689,
-        17: 152074905237872,
-        18: 172295888162591,
-        19: 171180013466534,
-        20: 148788016710735,
-        21: 116819145572773,
-        22: 80837621906387,
-        23: 45092384929916,
-        24: 14669882574776,
+        4: 15637776,
+        5: 434215298,
+        6: 5134332312,
+        7: 35954287761,
+        8: 176940907700,
+        9: 681645887470,
+        10: 2196939363030,
+        11: 6013383861363,
+        12: 14150619910046,
+        13: 29028610779400,
+        14: 52628199915758,
+        15: 84282386057250,
+        16: 119187739732285,
+        17: 150619562029189,
+        18: 170229289406892,
+        19: 168895107336986,
+        20: 146790701428366,
+        21: 115206479557660,
+        22: 79737647410334,
+        23: 44630993736698,
+        24: 14609561191538,
       },
     },
   }),
   mounted() {
-    this.createSpreadChart('.spread-chart-midnight-exclusive', this.spreads.midnightExclusive);
-    this.createSpreadChart('.spread-chart-fives', this.spreads.fives);
-    this.createSpreadChartDifference('.spread-chart-one-qualifier', this.spreads.oneQualifierDifference);
+    const { spreads } = this;
+    this.createSpreadChart('.spread-chart-sixes', spreads.sixes, {
+      title: 'Midnight Spread - taking only sixes'
+    });
+    this.createSpreadChart('.spread-chart-fives', spreads.fives);
+    this.createSpreadChartDiff('.spread-chart-fives-diff', spreads.sixes, spreads.fives);
+    this.createSpreadChart('.spread-chart-one-qualifier', spreads.oneQualifier);
+    this.createSpreadChartDiff('.spread-chart-one-qualifier-diff', spreads.sixes, spreads.oneQualifier);
   },
   methods: {
-    createSpreadChart(elementClass, data) {
-      // Define chart dimensions
-      const height = 160;
-      const width = 550;
-      const margin = { left: 40, right: 20, top: 20, bottom: 40 };
+    createSpreadChart(elementClass, data, options = {}) {
+      const { chart, height, width } = this.initChart(elementClass);
 
       // Gather data
       const dataArr = [];
@@ -194,18 +179,13 @@ export default {
       const sum = dataArr.reduce((acc, val) => acc + val.numGames, 0);
       const median = dataArr.reduce((acc, val) => acc + val.numGames * val.score, 0) / sum;
       let mean = -1;
-      let rollingNumGames = sum / 2;
-      while (rollingNumGames > 0) {
+      let rollingnumGames = sum / 2;
+      while (rollingnumGames > 0) {
         mean += 1;
-        rollingNumGames -= data[mean];
+        rollingnumGames -= data[mean];
       }
 
-      // Add HTML elements to create chart
-      const chart = d3.select(elementClass)
-        .attr('height', height + margin.top + margin.bottom)
-        .attr('width', width + margin.left + margin.right)
-        .append('g')
-          .attr('transform', `translate(${margin.left}, ${margin.top})`);
+      // Define scales
       const x = d3.scaleLinear()
         .domain([-1, 25])
         .range([0, width]);
@@ -229,7 +209,7 @@ export default {
           .attr('y', d => y(d.numGames))
           .attr('width', 20)
           .attr('height', d => y(0) - y(d.numGames))
-          .style('fill', d => d3.interpolateRdGy(1 - d.score / 24));
+          .style('fill', d => d3.interpolateRdBu(0.85 * (1 - d.score / 24)));
       chart.selectAll('.perc-text')
         .data(dataArr)
         .enter().append('text')
@@ -237,12 +217,6 @@ export default {
           .attr('x', d => x(d.score))
           .attr('y', d => y(d.numGames) - 2)
           .text(d => this.formatPercentage(d.numGames / sum));
-      /* chart.append('line')
-        .attr('class', 'median-line')
-        .attr('x1', x(median))
-        .attr('x2', x(median))
-        .attr('y1', 0)
-        .attr('y2', height); */
       chart.append('text')
         .attr('class', 'stat')
         .attr('x', width - 10)
@@ -253,62 +227,71 @@ export default {
         .attr('x', width - 10)
         .attr('y', 32)
         .text(`Mean: ${Math.round(10 * mean) / 10}`);
+      if (options.title) {
+        chart.append('text')
+          .attr('class', 'chart-title')
+          .attr('x', width / 2)
+          .attr('y', -15)
+          .text(options.title);
+      }
     },
-    createSpreadChartDifference(elementClass, data) {
-      // Define chart dimensions
-      const height = 160;
-      const width = 550;
-      const margin = { left: 40, right: 20, top: 20, bottom: 40 };
+    createSpreadChartDiff(elementClass, data1, data2) {
+      const { chart, height, width } = this.initChart(elementClass);
 
       // Gather data
-      const dataArr = [];
-      Object.keys(data).forEach((score) => {
-        dataArr.push({ score, numGames: data[score] });
-      });
-      const sum = dataArr.reduce((acc, val) => acc + val.numGames, 0);
-      const median = 16.4;
-      const mean = 18;
+      const sum1 = Object.values(data1).reduce((acc, val) => acc + val, 0);
+      const sum2 = Object.values(data2).reduce((acc, val) => acc + val, 0);
+      const diffData = [];
+      for (let i = 0; i <= 24; i += 1) {
+        diffData.push({
+          score: i,
+          percDiff: (data2[i] / sum2) - (data1[i] / sum1),
+        });
+      }
+      const maxValue = Math.max(...diffData.map(d => Math.abs(d.percDiff)));
+
       const medianDiff = 0.1266;
 
-      // Add HTML elements to create chart
-      const chart = d3.select(elementClass)
-        .attr('height', height + margin.top + margin.bottom)
-        .attr('width', width + margin.left + margin.right)
-        .append('g')
-          .attr('transform', `translate(${margin.left}, ${margin.top})`);
+      // Define scales
       const x = d3.scaleLinear()
         .domain([-1, 25])
         .range([0, width]);
       const y = d3.scaleLinear()
-        .domain([-0.012, 0.012])
+        .domain([-1.1 * maxValue, 1.1 * maxValue])
         .range([height, 0]);
+      const colorScale = d => d3.interpolateCividis(
+        d3.scaleLinear().domain([-maxValue, maxValue])(d)
+      );
 
       const xAxis = d3.axisBottom().scale(x);
-      const yAxis = d3.axisLeft().scale(y).tickFormat(d3.format('.1%'));
+      const yAxis = d3.axisLeft().scale(y).tickFormat(d3.format('+.1%'));
 
       chart.selectAll('.bar')
-        .data(dataArr)
+        .data(diffData)
         .enter().append('rect')
           .attr('class', 'bar')
           .attr('x', d => x(d.score) - 10)
-          .attr('y', d => (d.numGames > 0) ? y(d.numGames) : y(0))
+          .attr('y', d => (d.percDiff > 0) ? y(d.percDiff) : y(0))
           .attr('width', 20)
           .attr('height', d => (
-            (d.numGames > 0) ? y(0) - y(d.numGames) : y(d.numGames) - y(0)
+            (d.percDiff > 0) ? y(0) - y(d.percDiff) : y(d.percDiff) - y(0)
           ))
-          .style('fill', 'steelblue');
+          .style('fill', (d) => {
+            const normalizedVal = d3.scaleLinear().domain([-1.5*maxValue, 2 * maxValue])(Math.abs(d.percDiff));
+            return d3.interpolateGreens(normalizedVal);
+          });
       /* chart.selectAll('.perc-text')
         .data(dataArr)
         .enter().append('text')
           .attr('class', 'perc-text')
           .attr('x', d => x(d.score))
-          .attr('y', d => y(d.numGames) - 2)
-          .text(d => d3.format('+.1%')(d.numGames)); */
+          .attr('y', d => y(d.percDiff) - 2)
+          .text(d => d3.format('+.1%')(d.percDiff)); */
       chart.append('text')
         .attr('class', 'stat')
         .attr('x', width - 10)
         .attr('y', 20)
-        .text(`Median Diff: +0.13`);
+        .text(`Median Diff: ${d3.format('+.2')(medianDiff)}`);
       chart.append('text')
         .attr('class', 'stat')
         .attr('x', width - 10)
@@ -325,6 +308,21 @@ export default {
       if (num < 0.003) return '';
       if (num < 0.02) return `${Math.round(1000 * num) / 10}%`;
       return `${Math.round(100 * num)}%`;
+    },
+    initChart(elementClass) {
+      // Define chart dimensions
+      const height = 160;
+      const width = 550;
+      const margin = { left: 40, right: 20, top: 45, bottom: 40 };
+
+      // Add HTML elements to create chart
+      const chart = d3.select(elementClass)
+        .attr('height', height + margin.top + margin.bottom)
+        .attr('width', width + margin.left + margin.right)
+        .append('g')
+          .attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+      return { chart, height, width };
     },
   },
 };
@@ -357,5 +355,11 @@ pre {
   opacity: 0.5;
   stroke: black;
   stroke-dasharray: 2,2;
+}
+
+.chart-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-anchor: middle;
 }
 </style>
