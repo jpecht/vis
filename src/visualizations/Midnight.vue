@@ -1,4 +1,4 @@
-<template>
+\<template>
   <Post v-bind="info">
     <template v-slot:description>
       <p>
@@ -48,11 +48,14 @@
         The results were a little confusing. I'm not sure why there was <i>less</i> of a chance of
         getting no score, since the difference in strategy means you're not automatically taking
         both qualifiers. However, it looks like with this strategy, you're slightly less likely
-        to get Midnight, but you have a slightly higher average.
+        to get a high score, but more of a chance of scoring.
       </p>
       <p>
         In conclusion, it looks like both strategies are fairly viable.
-        You might consider the first strategy if you're going for a higher score though.
+        You might consider the first strategy if you're going for a higher score.
+        I hope to build out some more strategies with this code in the future.
+        For example, if you roll a [1, 4, 6, 6, 5, 5] on the first roll,
+        would you take that 22 immediately instead of re-rolling the 2 5's?
         If you are interested in the code, you can view the
         <a href="//github.com/jpecht/midnight-simnulator">repository on Github here</a>.
         It was written in Node and includes options to use each of the strategies I've outlined above.
@@ -75,31 +78,31 @@ export default {
     info: visualizations.find(v => v.url === 'midnight'),
     spreads: {
       oneQualifier: {
-        0: 505348509159014,
+        0: 310045260090014,
         1: 0,
         2: 0,
         3: 0,
-        4: 63888286,
-        5: 1835023638,
-        6: 22180681724,
-        7: 155594262649,
-        8: 753041412070,
-        9: 2826511571932,
-        10: 8921174392930,
-        11: 24016886757467,
-        12: 55637282287562,
-        13: 112290109091018,
-        14: 201120519884350,
-        15: 319221359910122,
-        16: 446483662434771,
-        17: 558429277538151,
-        18: 627148604940358,
-        19: 619147154121488,
-        20: 534349241774918,
-        21: 413776627784478,
-        22: 284904265223372,
-        23: 160867625546708,
-        24: 52249083457540,
+        4: 36369256,
+        5: 1036252558,
+        6: 12469930764,
+        7: 87487732869,
+        8: 425287515260,
+        9: 1607096503382,
+        10: 5102416693050,
+        11: 13803942726097,
+        12: 32125728844622,
+        13: 65148453929668,
+        14: 117139499224350,
+        15: 186502051130482,
+        16: 261756483457601,
+        17: 328476265774841,
+        18: 369823862007088,
+        19: 365865654938018,
+        20: 316518908494588,
+        21: 246097009871408,
+        22: 169882708518852,
+        23: 95907545993548,
+        24: 31263830744980,
       },
       fives: {
         0: 5209074573930,
@@ -250,7 +253,9 @@ export default {
       }
       const maxValue = Math.max(...diffData.map(d => Math.abs(d.percDiff)));
 
-      const medianDiff = 0.1266;
+      const median1 = Object.values(data1).reduce((acc, val, i) => acc + val * i, 0) / sum1;
+      const median2 = Object.values(data2).reduce((acc, val, i) => acc + val * i, 0) / sum2;
+      const medianDiff = median2 - median1;
 
       // Define scales
       const x = d3.scaleLinear()
@@ -277,16 +282,9 @@ export default {
             (d.percDiff > 0) ? y(0) - y(d.percDiff) : y(d.percDiff) - y(0)
           ))
           .style('fill', (d) => {
-            const normalizedVal = d3.scaleLinear().domain([-1.5*maxValue, 2 * maxValue])(Math.abs(d.percDiff));
+            const normalizedVal = d3.scaleLinear().domain([-maxValue, 1.5 * maxValue])(Math.abs(d.percDiff));
             return d3.interpolateGreens(normalizedVal);
           });
-      /* chart.selectAll('.perc-text')
-        .data(dataArr)
-        .enter().append('text')
-          .attr('class', 'perc-text')
-          .attr('x', d => x(d.score))
-          .attr('y', d => y(d.percDiff) - 2)
-          .text(d => d3.format('+.1%')(d.percDiff)); */
       chart.append('text')
         .attr('class', 'stat')
         .attr('x', width - 10)

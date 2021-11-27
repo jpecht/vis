@@ -1,10 +1,10 @@
 export default [
   {
-    title: 'Midnight Dice Game Simulation',
-    subtitle: 'a brute force analysis of midnight',
+    title: 'Dice Game Simulation',
+    subtitle: 'a brute force analysis of Midnight',
     date: 'Nov 28, 2021',
     url: 'midnight',
-    imageFilename: 'weather_ss.png',
+    imageFilename: 'midnight_ss.png',
   },
   /* {
     title: 'COVID-19 in US',
