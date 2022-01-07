@@ -2,7 +2,7 @@ export default [
   {
     title: 'Dice Game Simulation',
     subtitle: 'a brute force analysis of Midnight',
-    date: 'Nov 28, 2021',
+    date: 'Jan 07, 2022',
     url: 'midnight',
     imageFilename: 'midnight_ss.png',
   },

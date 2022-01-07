@@ -6,53 +6,82 @@
         roll six dice and try to get the highest total possible. You can re-roll as many
         times as you want, but you must keep at least one dice each time. The kick is that
         you must have a 1 and a 4 at the end to score.
-        So the highest possible total is 24: 1, 4, 6, 6, 6, 6.
+        So the highest possible total is 24: [1, 4, 6, 6, 6, 6].
         Getting a total of 24 is called Midnight and if you're gambling, it means you get
         double the money as well so it's a highly coveted feat.
       </p>
       <p>
         What I was most intrigued in was a strategy that my friend, Casey, posited.
-        If you, say, had a opening roll of 1, 4, 2, 2, 2, 2, do you keep both the 1 and the 4 immediately to make sure you qualify? Or do you keep just the 1 and re-roll the rest knowing that
+        If you, say, had an opening roll of [1, 4, 2, 2, 2, 2], do you keep both the 1 and the 4 immediately to make sure you qualify?
+        Or do you keep just the 1 and re-roll the rest knowing that
         you're likely to get the 4 later and give you an extra round to roll for the 6s?
         Well, since this is a dice game, there are a finite number of outcomes and I thought it
         couldn't be too difficult to make a brute-force simulation and solve this question.
       </p>
       <p>
-        My first attempt involved simply simulating all outcomes of the game using a simple strategy
-         where you take qualifiers (1s and 4s) immediately and take any 6s that are rolled (unless you still need qualifiers).
+        My simulation runs through every single possible roll of the dice.
+        I was able to verify the results by simulating large amounts of random rolls and making sure the percentages were similar.
+      </p>
+      <h3 class="midnight-strategy-header">Strategy 1: Hold Sixes</h3>
+      <p>
+        The first strategy I wanted to test is a very basic strategy and one that most people go with. 
+        When rolling dice, take qualifiers (1's and 4's) immediately and also take any 6's that are rolled
+        (but leaving as many dice as you need qualifiers).
+      </p>
+      <p>
+        So for example, if you roll [1, 6, 6, 3, 3, 3], you would take [1, 6, 6].
       </p>
       <svg class="spread-chart-sixes" />
       <p>
-        As you can see, there are over a quadrillion total outcomes and about 12 billion unique outcomes. The simulation itself took about 32 min to run on my laptop. Luckily, I had some spare time over Thanksgiving haha.
+        So it looks like with this basic strategy, your chances of getting Midnight are about 6.3%.
+        You have about a 15% chance of not scoring at all with this strategy and if you do score, you will average
+        somewhere around the 19 mark. 
       </p>
+      <h3 class="midnight-strategy-header">Strategy 2: Wait for Qualifiers</h3>
       <p>
-        Regarding the resulting spread chart, I was surprised to see that you only had about a 1% chance in getting Midnight.
-        It also looks like with this strategy, the average score hovers at about 18 and 19 interestingly.
-        The next strategy I wanted to test, just for comparison,
-        was to see how the spread would look if we took 5s as well as 6s.
-        This would be a more conservative strategy since you're willing to settle for 5s.
-      </p>
-      <svg class="spread-chart-fives" />
-      <svg class="spread-chart-fives-diff" />
-      <p>
-        This strategy predictably fared less well than the first strategy.
-        There really isn't much upside to this strategy.
-        The next strategy is the one I was excited to test.
-        This is similar to the first strategy where you take 6s,
-        <i>except</i> you will not take 6s until you have rolled both qualifiers.
+        Now, I wanted to test a more conservative strategy.
+        If you roll [1, 6, 6, 3, 3, 3], you are still missing a qualifier and may not want to take those 6's.
+        With this strategy, you will not take any 6's until you have rolled both qualifiers.
         This should theoretically be a safer strategy.
       </p>
-      <svg class="spread-chart-one-qualifier" />
-      <svg class="spread-chart-one-qualifier-diff" />
       <p>
-        The results were a little confusing. I'm not sure why there was <i>less</i> of a chance of
-        getting no score, since the difference in strategy means you take non-qualifiers less often.
-        It may have something to do with more simulations being run, but I can only conjecture.
-        It does look like you have more of a chance of scoring Midnight with this strategy surprisingly.
+        So with this same example, if you roll [1, 6, 6, 3, 3, 3], you would just take [1],
+        giving you more dice to roll to get that second qualifier.
+      </p>
+      <svg class="spread-chart-wait-for-qualifiers" />
+      <svg class="spread-chart-wait-for-qualifiers-diff" />
+      <p>
+        As expected, you have a <i>much</i> higher chance of scoring (85% => 95%) with this strategy.
+        However, with this more conservative approach, your chances of getting Midnight are lessened by about 2%.
+        In the long run though, this seems like a better overall strategy with the median score being almost 2 points higher than the previous strategy.
+      </p>
+      <h3 class="midnight-strategy-header">Strategy 3: Re-roll Qualifier</h3>
+      <p>
+        The next strategy is the one I was excited to test.
+        This is similar to the first strategy where you take 6s, <i>except</i> that you won't automatically take both qualifiers.
+        If you need both qualifiers and you roll both a 1 and a 4,
+        you only take one if you still have 3 or more dice to roll after.
       </p>
       <p>
-        In conclusion, it looks like both strategies are fairly viable.
-        You might consider the first strategy if you're going for a higher score.
+        So for example, if you roll [1, 4, 6, 2, 2, 2], you would just take [1, 6].
+        You re-roll the 4 even though you need it to qualify.
+        This should theoretically give you more chances to roll 6's with the extra die to roll.
+        And hopefully you'll roll the 4 again anyway.
+      </p>
+      <svg class="spread-chart-reroll-qualifier" />
+      <svg class="spread-chart-reroll-qualifier-diff" />
+      <p>
+        I was surprised by how drastic the percentages change with just a little tweak in strategy.
+        Re-rolling the qualifier unsurprisingly highly increases your chances to not score (15% -> 22%).
+        However, you do get increased chances in scoring 22 or higher, which could be beneficial if the person before you scored high.
+      </p>
+      <p>
+        In conclusion, it looks like there's no dominant strategy.
+        Some strategies will be better than others depending on what you need to score.
+        If the person before you scored Midnight, you might consider re-rolling qualifiers.
+        If you have to go first, you might just want to get a score on the table and re-roll all dice until you get qualifiers.
+      </p>
+      <p>
         I hope to build out some more strategies with this code in the future.
         For example, if you roll a [1, 4, 6, 6, 5, 5] on the first roll,
         would you take that 22 immediately instead of re-rolling the 2 5's?
@@ -77,98 +106,104 @@ export default {
   data: () => ({
     info: visualizations.find(v => v.url === 'midnight'),
     spreads: {
-      oneQualifier: {
-        0: 949276269895146,
+      rerollQualifier: {
+        0: 0.226,
         1: 0,
         2: 0,
         3: 0,
-        4: 53525780,
-        5: 1485822360,
-        6: 17539923334,
-        7: 122692307645,
-        8: 603271459828,
-        9: 2332615131077,
-        10: 7603337678920,
-        11: 21172044709095,
-        12: 50655222002259,
-        13: 105771924301866,
-        14: 195971178470577,
-        15: 322115013559341,
-        16: 466721514967331,
-        17: 603558592570311,
-        18: 705146929403307,
-        19: 726518237036920,
-        20: 647920949685387,
-        21: 523558763423690,
-        22: 378766113926112,
-        23: 234508301011060,
-        24: 89671311829380,
-      },
-      fives: {
-        0: 5209074573930,
-        1: 0,
-        2: 0,
-        3: 0,
-        4: 1187732,
-        5: 33684132,
-        6: 408921738,
-        7: 2916638787,
-        8: 14205844894,
-        9: 51895526776,
-        10: 154020129847,
-        11: 384703172397,
-        12: 827076366753,
-        13: 1538051173361,
-        14: 2523240533632,
-        15: 3670861824288,
-        16: 4748666454840,
-        17: 5489112721096,
-        18: 5673816899622,
-        19: 5255423885214,
-        20: 4334971341689,
-        21: 3163326792587,
-        22: 1967710072333,
-        23: 917908867464,
-        24: 230587413864,
+        4: 0,
+        5: 0,
+        6: 0,
+        7: 0.001,
+        8: 0.001,
+        9: 0.001,
+        10: 0.001,
+        11: 0.001,
+        12: 0.003,
+        13: 0.006,
+        14: 0.012,
+        15: 0.024,
+        16: 0.039,
+        17: 0.058,
+        18: 0.079,
+        19: 0.112,
+        20: 0.110,
+        21: 0.102,
+        22: 0.087,
+        23: 0.075,
+        24: 0.074,
       },
       sixes: {
-        0: 149541432580874,
+        0: 0.149,
         1: 0,
         2: 0,
         3: 0,
-        4: 15637776,
-        5: 434215298,
-        6: 5134332312,
-        7: 35954287761,
-        8: 176940907700,
-        9: 681645887470,
-        10: 2196939363030,
-        11: 6013383861363,
-        12: 14150619910046,
-        13: 29028610779400,
-        14: 52628199915758,
-        15: 84282386057250,
-        16: 119187739732285,
-        17: 150619562029189,
-        18: 170229289406892,
-        19: 168895107336986,
-        20: 146790701428366,
-        21: 115206479557660,
-        22: 79737647410334,
-        23: 44630993736698,
-        24: 14609561191538,
+        4: 0,
+        5: 0,
+        6: 0,
+        7: 0,
+        8: 0.001,
+        9: 0.001,
+        10: 0.001,
+        11: 0.002,
+        12: 0.004,
+        13: 0.009,
+        14: 0.018,
+        15: 0.033,
+        16: 0.053,
+        17: 0.074,
+        18: 0.096,
+        19: 0.124,
+        20: 0.119,
+        21: 0.104,
+        22: 0.086,
+        23: 0.071,
+        24: 0.064,
+      },
+      waitForQualifiers: {
+        0: 0.044,
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+        6: 0.001,
+        7: 0.001,
+        8: 0.001,
+        9: 0.001,
+        10: 0.001,
+        11: 0.003,
+        12: 0.006,
+        13: 0.013,
+        14: 0.025,
+        15: 0.045,
+        16: 0.069,
+        17: 0.095,
+        18: 0.118,
+        19: 0.142,
+        20: 0.131,
+        21: 0.113,
+        22: 0.09,
+        23: 0.066,
+        24: 0.046,
       },
     },
   }),
   mounted() {
     const { spreads } = this;
     this.createSpreadChart('.spread-chart-sixes', spreads.sixes, {
-      title: 'Midnight Spread - taking only sixes'
+      title: 'Midnight Spread - taking sixes'
     });
-    this.createSpreadChart('.spread-chart-fives', spreads.fives);
-    this.createSpreadChartDiff('.spread-chart-fives-diff', spreads.sixes, spreads.fives);
-    this.createSpreadChart('.spread-chart-one-qualifier', spreads.oneQualifier);
-    this.createSpreadChartDiff('.spread-chart-one-qualifier-diff', spreads.sixes, spreads.oneQualifier);
+    this.createSpreadChart('.spread-chart-wait-for-qualifiers', spreads.waitForQualifiers, {
+      title: 'Midnight Spread - wait for qualifiers',
+    });
+    this.createSpreadChartDiff('.spread-chart-wait-for-qualifiers-diff', spreads.sixes, spreads.waitForQualifiers, {
+      title: 'Midnight Spread Diff - wait for qualifiers vs. taking only sixes',
+    });
+    this.createSpreadChart('.spread-chart-reroll-qualifier', spreads.rerollQualifier, {
+      title: 'Midnight Spread - reroll qualifier',
+    });
+    this.createSpreadChartDiff('.spread-chart-reroll-qualifier-diff', spreads.sixes, spreads.rerollQualifier);
   },
   methods: {
     createSpreadChart(elementClass, data, options = {}) {
@@ -194,10 +229,11 @@ export default {
         .range([0, width]);
       const y = d3.scaleLinear()
         .domain([0, 1.1 * Math.max(...Object.values(data))])
+        // .domain([0, 0.25])
         .range([height, 0]);
 
       const xAxis = d3.axisBottom().scale(x);
-      const yAxis = d3.axisLeft().scale(y).tickFormat(d3.format('.2s'));
+      const yAxis = d3.axisLeft().scale(y).tickFormat(d3.format('.0%'));
       chart.append('g')
         .attr('transform', `translate(0, ${height})`)
         .call(xAxis);
@@ -212,24 +248,29 @@ export default {
           .attr('y', d => y(d.numGames))
           .attr('width', 20)
           .attr('height', d => y(0) - y(d.numGames))
-          .style('fill', d => d3.interpolateRdBu(0.85 * (1 - d.score / 24)));
+          .style('fill', d => d3.interpolateRdBu(0.9 * (1 - d.score / 24)));
       chart.selectAll('.perc-text')
         .data(dataArr)
         .enter().append('text')
           .attr('class', 'perc-text')
           .attr('x', d => x(d.score))
           .attr('y', d => y(d.numGames) - 2)
-          .text(d => this.formatPercentage(d.numGames / sum));
+          .text((d) => {
+            const num = d.numGames / sum;
+            if (num < 0.003) return '';
+            if (num > 0.1) return `${Math.round(100 * num)}%`;
+            return `${Math.round(1000 * num) / 10}%`;
+          });
       chart.append('text')
         .attr('class', 'stat')
         .attr('x', width - 10)
-        .attr('y', 20)
-        .text(`Median: ${Math.round(10 * median) / 10}`);
+        .attr('y', 10)
+        .text(`Median Score: ${Math.round(10 * median) / 10}`);
       chart.append('text')
         .attr('class', 'stat')
         .attr('x', width - 10)
-        .attr('y', 32)
-        .text(`Mean: ${Math.round(10 * mean) / 10}`);
+        .attr('y', 22)
+        .text(`Mean Score: ${Math.round(10 * mean) / 10}`);
       if (options.title) {
         chart.append('text')
           .attr('class', 'chart-title')
@@ -302,11 +343,6 @@ export default {
       chart.append('g')
         .call(yAxis);
     },
-    formatPercentage(num) {
-      if (num < 0.003) return '';
-      if (num < 0.02) return `${Math.round(1000 * num) / 10}%`;
-      return `${Math.round(100 * num)}%`;
-    },
     initChart(elementClass) {
       // Define chart dimensions
       const height = 160;
@@ -327,14 +363,10 @@ export default {
 </script>
 
 <style lang="scss">
-pre {
-  background-color: rgb(227, 230, 232);
-  font-size: 11px;
-  padding: 8px 0;
-}
-
-.bar {
-  fill: steelblue;
+.midnight-strategy-header {
+  font-size: 16px;
+  font-weight: 400;
+  margin-top: 24px;
 }
 
 .perc-text {
