@@ -39,16 +39,16 @@
         There really isn't much upside to this strategy.
         The next strategy is the one I was excited to test.
         This is similar to the first strategy where you take 6s,
-        <i>except</i> if you need both qualifiers and you roll both a 1 and a 4, you only take one if you will still have 3 or more dice to roll after.
-        This should theoretically give you more chances to roll a 6 with the extra die to roll.
+        <i>except</i> you will not take 6s until you have rolled both qualifiers.
+        This should theoretically be a safer strategy.
       </p>
       <svg class="spread-chart-one-qualifier" />
       <svg class="spread-chart-one-qualifier-diff" />
       <p>
         The results were a little confusing. I'm not sure why there was <i>less</i> of a chance of
-        getting no score, since the difference in strategy means you're not automatically taking
-        both qualifiers. However, it looks like with this strategy, you're slightly less likely
-        to get a high score, but more of a chance of scoring.
+        getting no score, since the difference in strategy means you take non-qualifiers less often.
+        It may have something to do with more simulations being run, but I can only conjecture.
+        It does look like you have more of a chance of scoring Midnight with this strategy surprisingly.
       </p>
       <p>
         In conclusion, it looks like both strategies are fairly viable.
@@ -78,31 +78,31 @@ export default {
     info: visualizations.find(v => v.url === 'midnight'),
     spreads: {
       oneQualifier: {
-        0: 310045260090014,
+        0: 949276269895146,
         1: 0,
         2: 0,
         3: 0,
-        4: 36369256,
-        5: 1036252558,
-        6: 12469930764,
-        7: 87487732869,
-        8: 425287515260,
-        9: 1607096503382,
-        10: 5102416693050,
-        11: 13803942726097,
-        12: 32125728844622,
-        13: 65148453929668,
-        14: 117139499224350,
-        15: 186502051130482,
-        16: 261756483457601,
-        17: 328476265774841,
-        18: 369823862007088,
-        19: 365865654938018,
-        20: 316518908494588,
-        21: 246097009871408,
-        22: 169882708518852,
-        23: 95907545993548,
-        24: 31263830744980,
+        4: 53525780,
+        5: 1485822360,
+        6: 17539923334,
+        7: 122692307645,
+        8: 603271459828,
+        9: 2332615131077,
+        10: 7603337678920,
+        11: 21172044709095,
+        12: 50655222002259,
+        13: 105771924301866,
+        14: 195971178470577,
+        15: 322115013559341,
+        16: 466721514967331,
+        17: 603558592570311,
+        18: 705146929403307,
+        19: 726518237036920,
+        20: 647920949685387,
+        21: 523558763423690,
+        22: 378766113926112,
+        23: 234508301011060,
+        24: 89671311829380,
       },
       fives: {
         0: 5209074573930,
