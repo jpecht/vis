@@ -4,36 +4,36 @@
       <p>
         If you're not familiar with the game, Midnight, it's a simple dice game where you
         roll six dice and try to get the highest total possible. You can re-roll as many
-        times as you want, but you must keep at least one dice each time. The kick is that
+        times as you want, but you must keep at least one die each time. The kick is that
         you must have a 1 and a 4 at the end to score.
         So the highest possible total is 24: [1, 4, 6, 6, 6, 6].
         Getting a total of 24 is called Midnight and if you're gambling, it means you get
         double the money as well so it's a highly coveted feat.
       </p>
       <p>
-        What I was most intrigued in was a strategy that my friend, Casey, posited.
+        What I was most intrigued in was a strategy my friend posited.
         If you, say, had an opening roll of [1, 4, 2, 2, 2, 2], do you keep both the 1 and the 4 immediately to make sure you qualify?
         Or do you keep just the 1 and re-roll the rest knowing that
-        you're likely to get the 4 later and give you an extra round to roll for the 6s?
+        you're likely to get the 4 later and give you an extra round to roll for 6's?
         Well, since this is a dice game, there are a finite number of outcomes and I thought it
-        couldn't be too difficult to make a brute-force simulation and solve this question.
+        couldn't be too difficult to make a brute-force simulation and test some different strategies.
       </p>
       <p>
-        My simulation runs through every single possible roll of the dice.
+        My simulation runs through every single possible roll of the dice, which can result in anywhere between 10-50 billion permutations.
         I was able to verify the results by simulating large amounts of random rolls and making sure the percentages were similar.
       </p>
       <h3 class="midnight-strategy-header">Strategy 1: Hold Sixes</h3>
       <p>
         The first strategy I wanted to test is a very basic strategy and one that most people go with. 
-        When rolling dice, take qualifiers (1's and 4's) immediately and also take any 6's that are rolled
-        (but leaving as many dice as you need qualifiers).
+        When rolling dice, take qualifiers (1's and 4's) immediately, but also take any 6's that are rolled
+        (but still leaving as many dice as you need qualifiers).
       </p>
       <p>
         So for example, if you roll [1, 6, 6, 3, 3, 3], you would take [1, 6, 6].
       </p>
       <svg class="spread-chart-sixes" />
       <p>
-        So it looks like with this basic strategy, your chances of getting Midnight are about 6.3%.
+        So it looks like with this basic strategy, your chances of getting Midnight are about 6.4%.
         You have about a 15% chance of not scoring at all with this strategy and if you do score, you will average
         somewhere around the 19 mark. 
       </p>
@@ -51,7 +51,7 @@
       <svg class="spread-chart-wait-for-qualifiers" />
       <svg class="spread-chart-wait-for-qualifiers-diff" />
       <p>
-        As expected, you have a <i>much</i> higher chance of scoring (85% => 95%) with this strategy.
+        As expected, you have a much higher chance of getting a non-zero score (85% => 95%) with this strategy.
         However, with this more conservative approach, your chances of getting Midnight are lessened by about 2%.
         In the long run though, this seems like a better overall strategy with the median score being almost 2 points higher than the previous strategy.
       </p>
@@ -71,23 +71,23 @@
       <svg class="spread-chart-reroll-qualifier" />
       <svg class="spread-chart-reroll-qualifier-diff" />
       <p>
-        I was surprised by how drastic the percentages change with just a little tweak in strategy.
-        Re-rolling the qualifier unsurprisingly highly increases your chances to not score (15% -> 22%).
-        However, you do get increased chances in scoring 22 or higher, which could be beneficial if the person before you scored high.
+        Re-rolling the qualifier unsurprisingly highly increases your chances to not score (15% -> 23%).
+        However, you do get increased chances in scoring 22 or higher, which could be beneficial if you're trying to beat a high score.
       </p>
       <p>
         In conclusion, it looks like there's no dominant strategy.
         Some strategies will be better than others depending on what you need to score.
-        If the person before you scored Midnight, you might consider re-rolling qualifiers.
-        If you have to go first, you might just want to get a score on the table and re-roll all dice until you get qualifiers.
+        If the person before you scored Midnight, you might consider re-rolling qualifiers for a chance at a higher score (strategy 3).
+        If you have to go first, you might just want to get a score on the table and re-roll all dice until you get qualifiers (strategy 2).
+        You could also implement a strategy that's a medley of two, e.g. only waiting for qualifiers if you have 3 or less dice.
       </p>
       <p>
         I hope to build out some more strategies with this code in the future.
         For example, if you roll a [1, 4, 6, 6, 5, 5] on the first roll,
-        would you take that 22 immediately instead of re-rolling the 2 5's?
+        would you take that score of 22 immediately instead of re-rolling the two 5's?
         If you are interested in the code, you can view the
         <a href="//github.com/jpecht/midnight-simnulator">repository on Github here</a>.
-        It was written in Node and includes options to use each of the strategies I've outlined above.
+        It was written in NodeJS and includes options to use each of the strategies I've outlined above.
       </p>
     </template>
   </Post>
@@ -107,85 +107,85 @@ export default {
     info: visualizations.find(v => v.url === 'midnight'),
     spreads: {
       rerollQualifier: {
-        0: 0.226,
+        0: 0.22519,
         1: 0,
         2: 0,
         3: 0,
         4: 0,
-        5: 0,
-        6: 0,
-        7: 0.001,
-        8: 0.001,
-        9: 0.001,
-        10: 0.001,
-        11: 0.001,
-        12: 0.003,
-        13: 0.006,
-        14: 0.012,
-        15: 0.024,
-        16: 0.039,
-        17: 0.058,
-        18: 0.079,
-        19: 0.112,
-        20: 0.110,
-        21: 0.102,
-        22: 0.087,
-        23: 0.075,
-        24: 0.074,
+        5: 0.00001,
+        6: 0.00001,
+        7: 0.00001,
+        8: 0.00002,
+        9: 0.00007,
+        10: 0.00026,
+        11: 0.00083,
+        12: 0.00224,
+        13: 0.00527,
+        14: 0.0117,
+        15: 0.02298,
+        16: 0.03876,
+        17: 0.05726,
+        18: 0.07857,
+        19: 0.11207,
+        20: 0.10888,
+        21: 0.10094,
+        22: 0.0867,
+        23: 0.07495,
+        24: 0.07341,
       },
       sixes: {
-        0: 0.149,
+        0: 0.1481,
         1: 0,
         2: 0,
         3: 0,
-        4: 0,
-        5: 0,
-        6: 0,
-        7: 0,
-        8: 0.001,
-        9: 0.001,
-        10: 0.001,
-        11: 0.002,
-        12: 0.004,
-        13: 0.009,
-        14: 0.018,
-        15: 0.033,
-        16: 0.053,
-        17: 0.074,
-        18: 0.096,
-        19: 0.124,
-        20: 0.119,
-        21: 0.104,
-        22: 0.086,
-        23: 0.071,
-        24: 0.064,
+        4: 0.00001,
+        5: 0.00001,
+        6: 0.00001,
+        7: 0.00004,
+        8: 0.00004,
+        9: 0.00015,
+        10: 0.0005,
+        11: 0.00151,
+        12: 0.00388,
+        13: 0.00864,
+        14: 0.01785,
+        15: 0.03277,
+        16: 0.05234,
+        17: 0.0736,
+        18: 0.09536,
+        19: 0.12408,
+        20: 0.11738,
+        21: 0.10474,
+        22: 0.08557,
+        23: 0.06974,
+        24: 0.06382,
       },
       waitForQualifiers: {
         0: 0.044,
         1: 0,
         2: 0,
         3: 0,
-        4: 0,
-        5: 0,
-        6: 0.001,
-        7: 0.001,
-        8: 0.001,
-        9: 0.001,
-        10: 0.001,
-        11: 0.003,
-        12: 0.006,
-        13: 0.013,
-        14: 0.025,
-        15: 0.045,
-        16: 0.069,
-        17: 0.095,
-        18: 0.118,
-        19: 0.142,
-        20: 0.131,
-        21: 0.113,
-        22: 0.09,
-        23: 0.066,
-        24: 0.046,
+        4: 0.00001,
+        5: 0.00001,
+        6: 0.00001,
+        7: 0.00002,
+        8: 0.00006,
+        9: 0.00022,
+        10: 0.00076,
+        11: 0.0023,
+        12: 0.00563,
+        13: 0.0124,
+        14: 0.02488,
+        15: 0.0442,
+        16: 0.06854,
+        17: 0.09439,
+        18: 0.11866,
+        19: 0.14149,
+        20: 0.13049,
+        21: 0.1126,
+        22: 0.08955,
+        23: 0.06551,
+        24: 0.04519,
       },
     },
   }),
