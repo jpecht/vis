@@ -1,5 +1,12 @@
 export default [
   {
+    title: 'Gambling Squares',
+    subtitle: 'heat maps of winning squares',
+    date: 'Mar 17, 2023',
+    url: 'squares',
+    imageFilename: 'squares_ss.png',
+  },
+  {
     title: 'Dice Game Simulation',
     subtitle: 'a brute force analysis of Midnight',
     date: 'Jan 07, 2022',

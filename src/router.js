@@ -90,6 +90,10 @@ export default new Router({
       component: () => import('./visualizations/Poverty.vue'),
     },
     {
+      path: '/squares',
+      component: () => import('./visualizations/ScoreGrid.vue'),
+    },
+    {
       path: '/tv-show-viewership',
       component: () => import('./visualizations/TvShowViewership.vue'),
     },
